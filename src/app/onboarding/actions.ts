@@ -62,8 +62,13 @@ export async function saveOnboarding(formData: FormData) {
   const postcode = (formData.get("postcode") as string | null)?.trim() ?? "";
   const maxCommuteMinutes = Number(formData.get("max_commute_minutes"));
   const rightToWorkRaw = formData.get("right_to_work");
+  const fullName = (formData.get("full_name") as string | null)?.trim() ?? "";
+  const schoolYear = (formData.get("school_year") as string | null)?.trim() ?? "";
+  const securityClearanceRaw = formData.get("security_clearance_eligible");
 
   const errors: string[] = [];
+  if (!fullName) errors.push("Full name is required");
+  if (!schoolYear) errors.push("School year is required");
   if (subjects.length === 0) errors.push("Add at least one subject");
   if (sectorsOfInterest.length === 0) errors.push("Pick at least one sector");
   if (!postcode) errors.push("Postcode is required");
@@ -76,9 +81,18 @@ export async function saveOnboarding(formData: FormData) {
     redirect(`/onboarding?error=${encodeURIComponent(errors.join("; "))}`);
   }
 
+  const securityClearanceEligible =
+    securityClearanceRaw === "yes"
+      ? true
+      : securityClearanceRaw === "no"
+        ? false
+        : null;
+
   const { error } = await supabase
     .from("profiles")
     .update({
+      full_name: fullName,
+      school_year: schoolYear,
       subjects,
       grades,
       predicted_grades: predictedGrades,
@@ -86,6 +100,7 @@ export async function saveOnboarding(formData: FormData) {
       max_commute_minutes: maxCommuteMinutes,
       postcode,
       right_to_work: rightToWorkRaw === "yes",
+      security_clearance_eligible: securityClearanceEligible,
       onboarding_complete: true,
     })
     .eq("user_id", user.id);

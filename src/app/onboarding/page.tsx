@@ -21,7 +21,7 @@ export default async function OnboardingPage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "subjects, grades, predicted_grades, sectors_of_interest, postcode, max_commute_minutes, right_to_work"
+      "full_name, school_year, subjects, grades, predicted_grades, sectors_of_interest, postcode, max_commute_minutes, right_to_work, security_clearance_eligible"
     )
     .eq("user_id", user.id)
     .single();
@@ -44,11 +44,14 @@ export default async function OnboardingPage({
         </p>
       </div>
       <OnboardingForm
+        initialFullName={profile?.full_name ?? ""}
+        initialSchoolYear={profile?.school_year ?? ""}
         initialSubjects={initialSubjects}
         initialSectors={profile?.sectors_of_interest ?? []}
         initialPostcode={profile?.postcode ?? ""}
         initialMaxCommuteMinutes={profile?.max_commute_minutes ?? null}
         initialRightToWork={profile?.right_to_work ?? null}
+        initialSecurityClearanceEligible={profile?.security_clearance_eligible ?? null}
         error={error}
       />
     </main>

@@ -10,11 +10,14 @@ import {
 } from "./constants";
 
 type Props = {
+  initialFullName: string;
+  initialSchoolYear: string;
   initialSubjects: SubjectRow[];
   initialSectors: string[];
   initialPostcode: string;
   initialMaxCommuteMinutes: number | null;
   initialRightToWork: boolean | null;
+  initialSecurityClearanceEligible: boolean | null;
   error?: string;
 };
 
@@ -23,11 +26,14 @@ const buttonClass =
   "rounded border px-3 py-2 text-sm transition-transform active:scale-[0.97]";
 
 export default function OnboardingForm({
+  initialFullName,
+  initialSchoolYear,
   initialSubjects,
   initialSectors,
   initialPostcode,
   initialMaxCommuteMinutes,
   initialRightToWork,
+  initialSecurityClearanceEligible,
   error,
 }: Props) {
   const [subjects, setSubjects] = useState<SubjectRow[]>(
@@ -75,6 +81,29 @@ export default function OnboardingForm({
       <input type="hidden" name="predicted_grades_json" value={predictedGradesJson} />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <fieldset className="flex flex-wrap gap-4">
+        <label className="flex flex-col gap-1 text-sm">
+          Full name
+          <input
+            name="full_name"
+            required
+            defaultValue={initialFullName}
+            className={inputClass}
+            placeholder="e.g. Archie Richardson"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          School year
+          <input
+            name="school_year"
+            required
+            defaultValue={initialSchoolYear}
+            className={inputClass}
+            placeholder="e.g. Year 13"
+          />
+        </label>
+      </fieldset>
 
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-1 text-sm font-medium">Subjects & grades</legend>
@@ -209,6 +238,44 @@ export default function OnboardingForm({
               defaultChecked={initialRightToWork === false}
             />
             No
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-1 text-sm font-medium">
+          Eligible for security clearance (SC/DV)?
+        </legend>
+        <div className="flex gap-4 text-sm">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="security_clearance_eligible"
+              value="yes"
+              defaultChecked={initialSecurityClearanceEligible === true}
+            />
+            Yes
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="security_clearance_eligible"
+              value="no"
+              defaultChecked={initialSecurityClearanceEligible === false}
+            />
+            No
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="security_clearance_eligible"
+              value="unsure"
+              defaultChecked={
+                initialSecurityClearanceEligible === null ||
+                initialSecurityClearanceEligible === undefined
+              }
+            />
+            Not sure
           </label>
         </div>
       </fieldset>
