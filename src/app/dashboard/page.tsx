@@ -33,6 +33,9 @@ export default async function DashboardPage() {
       <Link href="/discovery" className="text-sm underline">
         Browse apprenticeships
       </Link>
+      <Link href="/applications" className="text-sm underline">
+        My applications
+      </Link>
       <form>
         <button
           formAction={signOut}
