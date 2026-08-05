@@ -140,7 +140,7 @@ RLS: every table except `vacancies` and `employer_sources` (shared reference dat
 **Enforcement**
 - `profiles.subscription_tier` is the single source of truth the UI and API both check; never trust a client-side flag.
 - Stripe Checkout for upgrade, Stripe Customer Portal for self-serve cancel/manage, Stripe webhooks are the only writer of `subscription_tier` and the `subscriptions` table (source of truth flows from Stripe, not from the app guessing at payment state).
-- On downgrade/cancellation, in-flight drafts already created stay visible (read-only) — only *creating new* drafts is gated, so a lapsed subscriber doesn't lose work mid-application-cycle.
+- On downgrade/cancellation, only the *Anthropic call itself* (creating a brand-new draft) is gated — editing, approving, rejecting, and marking-submitted on an existing draft all stay fully usable regardless of tier, since they're free local operations and blocking them would strand a lapsed subscriber mid-application. (Implemented and confirmed live 2026-08-05; supersedes this section's earlier "read-only" wording, which was more restrictive than the actual intent.)
 
 ## 8. Data protection (minors)
 
