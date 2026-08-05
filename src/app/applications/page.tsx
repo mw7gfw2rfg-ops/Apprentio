@@ -88,7 +88,11 @@ export default async function ApplicationsPage({
           if (!vacancy) return null;
 
           return (
-            <li key={application.id} className="rounded border p-4">
+            <li
+              key={application.id}
+              id={`application-${application.id}`}
+              className="scroll-mt-4 rounded border p-4"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="font-medium">{vacancy.role_title}</h2>
