@@ -1,12 +1,21 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { draftApplication } from "./actions";
+import {
+  approveApplication,
+  draftApplication,
+  editDraft,
+  markSubmitted,
+  rejectApplication,
+} from "./actions";
 
 type ApplicationRow = {
   id: string;
   stage: string;
   drafted_cv: string | null;
   drafted_cover_letter: string | null;
+  draft_notes: string | null;
+  approved_at: string | null;
+  submitted_at: string | null;
   vacancies: {
     employer_name: string;
     role_title: string;
@@ -50,7 +59,7 @@ export default async function ApplicationsPage({
   const { data: applications } = await supabase
     .from("applications")
     .select(
-      "id, stage, drafted_cv, drafted_cover_letter, vacancies(employer_name, role_title, apply_url, closing_date)"
+      "id, stage, drafted_cv, drafted_cover_letter, draft_notes, approved_at, submitted_at, vacancies(employer_name, role_title, apply_url, closing_date)"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -86,12 +95,17 @@ export default async function ApplicationsPage({
                   <p className="text-sm text-neutral-500">{vacancy.employer_name}</p>
                 </div>
                 <span className="rounded-full border px-2 py-0.5 text-xs uppercase text-neutral-500">
-                  {application.stage.replace("_", " ")}
+                  {application.stage.replaceAll("_", " ")}
                 </span>
               </div>
 
               {application.stage === "saved" && (
-                <div className="mt-3">
+                <div className="mt-3 flex flex-col gap-2">
+                  {application.draft_notes && (
+                    <p className="text-sm text-neutral-500">
+                      Last draft rejected: {application.draft_notes}
+                    </p>
+                  )}
                   {!isPremium && (
                     <button
                       type="button"
@@ -122,32 +136,120 @@ export default async function ApplicationsPage({
               )}
 
               {application.stage === "ready_for_review" && (
+                <form className="mt-3 flex flex-col gap-3 text-sm">
+                  <input type="hidden" name="application_id" value={application.id} />
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs uppercase text-neutral-400">Tailored CV</span>
+                    <textarea
+                      name="drafted_cv"
+                      defaultValue={application.drafted_cv ?? ""}
+                      rows={10}
+                      className="rounded border bg-neutral-50 p-3 font-mono text-xs dark:bg-neutral-900"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs uppercase text-neutral-400">
+                      Tailored cover letter
+                    </span>
+                    <textarea
+                      name="drafted_cover_letter"
+                      defaultValue={application.drafted_cover_letter ?? ""}
+                      rows={10}
+                      className="rounded border bg-neutral-50 p-3 font-mono text-xs dark:bg-neutral-900"
+                    />
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      formAction={editDraft}
+                      className="rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
+                    >
+                      Save edit
+                    </button>
+                    <button
+                      formAction={approveApplication}
+                      className="rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97]"
+                    >
+                      Approve
+                    </button>
+                  </div>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs uppercase text-neutral-400">
+                      Reject — reason (required)
+                    </span>
+                    <div className="flex gap-2">
+                      <input
+                        name="reason"
+                        required
+                        className="flex-1 rounded border px-3 py-1.5 text-sm"
+                        placeholder="e.g. tone is off, missing my NEA project"
+                      />
+                      <button
+                        formAction={rejectApplication}
+                        className="rounded border px-3 py-1.5 text-sm text-red-600 transition-transform active:scale-[0.97]"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </label>
+                </form>
+              )}
+
+              {application.stage === "approved" && (
                 <div className="mt-3 flex flex-col gap-3 text-sm">
+                  <p className="text-xs text-neutral-400">
+                    Approved {application.approved_at && new Date(application.approved_at).toLocaleString()}
+                  </p>
                   <div>
-                    <h3 className="text-xs uppercase text-neutral-400">Tailored CV</h3>
+                    <h3 className="text-xs uppercase text-neutral-400">Final CV</h3>
                     <pre className="mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded bg-neutral-50 p-3 text-xs dark:bg-neutral-900">
                       {application.drafted_cv}
                     </pre>
                   </div>
                   <div>
-                    <h3 className="text-xs uppercase text-neutral-400">Tailored cover letter</h3>
+                    <h3 className="text-xs uppercase text-neutral-400">Final cover letter</h3>
                     <pre className="mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded bg-neutral-50 p-3 text-xs dark:bg-neutral-900">
                       {application.drafted_cover_letter}
                     </pre>
                   </div>
+                  {vacancy.apply_url && (
+                    <a
+                      href={vacancy.apply_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium underline"
+                    >
+                      Apply directly on the employer/Find an Apprenticeship page →
+                    </a>
+                  )}
+                  <form>
+                    <input type="hidden" name="application_id" value={application.id} />
+                    <button
+                      formAction={markSubmitted}
+                      className="self-start rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
+                    >
+                      Mark as submitted
+                    </button>
+                  </form>
                 </div>
               )}
 
-              {vacancy.apply_url && (
-                <a
-                  href={vacancy.apply_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 inline-block text-sm underline"
-                >
-                  View on Find an Apprenticeship
-                </a>
+              {application.stage === "submitted" && (
+                <p className="mt-3 text-sm text-neutral-500">
+                  Submitted {application.submitted_at && new Date(application.submitted_at).toLocaleString()}
+                </p>
               )}
+
+              {(application.stage === "saved" || application.stage === "ready_for_review") &&
+                vacancy.apply_url && (
+                  <a
+                    href={vacancy.apply_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-block text-sm underline"
+                  >
+                    View on Find an Apprenticeship
+                  </a>
+                )}
             </li>
           );
         })}

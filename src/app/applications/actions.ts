@@ -95,3 +95,144 @@ export async function draftApplication(formData: FormData) {
 
   revalidatePath("/applications");
 }
+
+function getApplicationId(formData: FormData): string {
+  const id = formData.get("application_id");
+  if (typeof id !== "string" || !id) {
+    redirect("/applications?error=Missing application");
+  }
+  return id;
+}
+
+// Saves edited draft text without changing stage — lets the student adjust
+// content, then decide separately whether to Approve.
+export async function editDraft(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const applicationId = getApplicationId(formData);
+  const draftedCv = formData.get("drafted_cv");
+  const draftedCoverLetter = formData.get("drafted_cover_letter");
+
+  if (typeof draftedCv !== "string" || typeof draftedCoverLetter !== "string") {
+    redirect("/applications?error=Missing draft content");
+  }
+
+  const { error } = await supabase
+    .from("applications")
+    .update({ drafted_cv: draftedCv, drafted_cover_letter: draftedCoverLetter })
+    .eq("id", applicationId)
+    .eq("user_id", user.id)
+    .eq("stage", "ready_for_review");
+
+  if (error) {
+    redirect(`/applications?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/applications");
+}
+
+// Approves using whatever is currently in the form fields, so an edit made
+// just before clicking Approve is captured in the same step.
+export async function approveApplication(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const applicationId = getApplicationId(formData);
+  const draftedCv = formData.get("drafted_cv");
+  const draftedCoverLetter = formData.get("drafted_cover_letter");
+
+  if (typeof draftedCv !== "string" || typeof draftedCoverLetter !== "string") {
+    redirect("/applications?error=Missing draft content");
+  }
+
+  const { error } = await supabase
+    .from("applications")
+    .update({
+      drafted_cv: draftedCv,
+      drafted_cover_letter: draftedCoverLetter,
+      stage: "approved",
+      approved_at: new Date().toISOString(),
+    })
+    .eq("id", applicationId)
+    .eq("user_id", user.id)
+    .eq("stage", "ready_for_review");
+
+  if (error) {
+    redirect(`/applications?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/applications");
+}
+
+// Sends a rejected draft back to 'saved', not PLAN.md's terminal 'rejected'
+// stage — that stage means a real employer decision post-submission. Reusing
+// it here would conflate "I didn't like this AI draft" with an actual
+// rejection, corrupting both the kanban board and any future rejection-rate
+// tracking. The reason is kept in draft_notes; drafted content is cleared so
+// a stale rejected draft can't be mistaken for the current one.
+export async function rejectApplication(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const applicationId = getApplicationId(formData);
+  const reason = (formData.get("reason") as string | null)?.trim() ?? "";
+
+  if (!reason) {
+    redirect("/applications?error=A reason is required to reject a draft");
+  }
+
+  const { error } = await supabase
+    .from("applications")
+    .update({
+      stage: "saved",
+      drafted_cv: null,
+      drafted_cover_letter: null,
+      draft_notes: reason,
+    })
+    .eq("id", applicationId)
+    .eq("user_id", user.id)
+    .eq("stage", "ready_for_review");
+
+  if (error) {
+    redirect(`/applications?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/applications");
+}
+
+export async function markSubmitted(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const applicationId = getApplicationId(formData);
+
+  const { error } = await supabase
+    .from("applications")
+    .update({
+      stage: "submitted",
+      submitted_at: new Date().toISOString(),
+      submission_method: "manual",
+    })
+    .eq("id", applicationId)
+    .eq("user_id", user.id)
+    .eq("stage", "approved");
+
+  if (error) {
+    redirect(`/applications?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/applications");
+}
