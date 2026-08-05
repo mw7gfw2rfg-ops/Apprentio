@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:employers": "bun run scripts/seed-employer-sources.ts"
+    "seed:employers": "bun run scripts/seed-employer-sources.ts",
+    "vacancies:add-curated": "bun run scripts/add-curated-vacancy.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

@@ -21,7 +21,7 @@ export default async function OnboardingPage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, school_year, subjects, grades, predicted_grades, sectors_of_interest, postcode, max_commute_minutes, right_to_work, security_clearance_eligible"
+      "full_name, school_year, subjects, grades, predicted_grades, sectors_of_interest, postcode, max_commute_minutes, right_to_work, security_clearance_eligible, minimum_apprenticeship_level"
     )
     .eq("user_id", user.id)
     .single();
@@ -52,6 +52,7 @@ export default async function OnboardingPage({
         initialMaxCommuteMinutes={profile?.max_commute_minutes ?? null}
         initialRightToWork={profile?.right_to_work ?? null}
         initialSecurityClearanceEligible={profile?.security_clearance_eligible ?? null}
+        initialMinimumApprenticeshipLevel={profile?.minimum_apprenticeship_level ?? null}
         error={error}
       />
     </main>

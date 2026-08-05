@@ -37,7 +37,9 @@ export default async function DiscoveryPage({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("onboarding_complete, sectors_of_interest, postcode, max_commute_minutes")
+    .select(
+      "onboarding_complete, sectors_of_interest, postcode, max_commute_minutes, minimum_apprenticeship_level"
+    )
     .eq("user_id", user.id)
     .single();
 
@@ -57,15 +59,23 @@ export default async function DiscoveryPage({
     if (!coords) {
       geocodeFailed = true;
     } else {
-      const { data: vacancies } = await supabase
+      let vacanciesQuery = supabase
         .from("vacancies")
         .select(
           "id, employer_name, role_title, apprenticeship_level, sector, location, postcode, closing_date, apply_url, latitude, longitude"
         )
         .gte("closing_date", today)
         .overlaps("sector", routes)
-        .order("closing_date", { ascending: true })
-        .returns<VacancyRow[]>();
+        .order("closing_date", { ascending: true });
+
+      if (profile.minimum_apprenticeship_level != null) {
+        vacanciesQuery = vacanciesQuery.gte(
+          "apprenticeship_level",
+          profile.minimum_apprenticeship_level
+        );
+      }
+
+      const { data: vacancies } = await vacanciesQuery.returns<VacancyRow[]>();
 
       const maxMiles = maxCommuteMiles(profile.max_commute_minutes);
       matches = (vacancies ?? [])
@@ -107,6 +117,17 @@ export default async function DiscoveryPage({
           We couldn&apos;t locate the postcode on your profile ({profile.postcode}).{" "}
           <Link href="/onboarding" className="underline">
             Update it
+          </Link>
+          .
+        </p>
+      )}
+
+      {profile.minimum_apprenticeship_level == null && (
+        <p className="text-sm text-neutral-500">
+          You haven&apos;t set a minimum apprenticeship level, so results below aren&apos;t
+          filtered by level.{" "}
+          <Link href="/onboarding" className="underline">
+            Set one
           </Link>
           .
         </p>

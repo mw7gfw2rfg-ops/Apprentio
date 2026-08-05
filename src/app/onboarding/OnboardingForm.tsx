@@ -5,6 +5,7 @@ import { saveOnboarding } from "./actions";
 import {
   COMMUTE_OPTIONS,
   GRADE_OPTIONS,
+  LEVEL_OPTIONS,
   SECTOR_OPTIONS,
   type SubjectRow,
 } from "./constants";
@@ -18,6 +19,7 @@ type Props = {
   initialMaxCommuteMinutes: number | null;
   initialRightToWork: boolean | null;
   initialSecurityClearanceEligible: boolean | null;
+  initialMinimumApprenticeshipLevel: number | null;
   error?: string;
 };
 
@@ -34,6 +36,7 @@ export default function OnboardingForm({
   initialMaxCommuteMinutes,
   initialRightToWork,
   initialSecurityClearanceEligible,
+  initialMinimumApprenticeshipLevel,
   error,
 }: Props) {
   const [subjects, setSubjects] = useState<SubjectRow[]>(
@@ -211,6 +214,24 @@ export default function OnboardingForm({
             {COMMUTE_OPTIONS.map((mins) => (
               <option key={mins} value={mins}>
                 {mins} minutes
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          Minimum apprenticeship level
+          <select
+            name="minimum_apprenticeship_level"
+            required
+            defaultValue={initialMinimumApprenticeshipLevel ?? ""}
+            className={inputClass}
+          >
+            <option value="" disabled>
+              Choose…
+            </option>
+            {LEVEL_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
               </option>
             ))}
           </select>

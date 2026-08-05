@@ -1,0 +1,12 @@
+{
+  "employer_name": "REPLACE_ME — must exactly match an employer_sources.employer_name (e.g. \"GCHQ CyberFirst\")",
+  "role_title": "REPLACE_ME — e.g. \"Cyber Security Degree Apprenticeship\"",
+  "apprenticeship_level": 6,
+  "closing_date": "REPLACE_ME — YYYY-MM-DD",
+  "apply_url": "REPLACE_ME — the real application URL once the window is live",
+  "sector": ["Cybersecurity"],
+  "standard_reference": "ST0409",
+  "location": "REPLACE_ME — e.g. \"Cheltenham + London satellite offices\"",
+  "postcode": "REPLACE_ME — e.g. \"GL51 0EX\", used for commute-distance matching",
+  "description": "REPLACE_ME — optional, pasted from the real listing"
+}

@@ -65,6 +65,9 @@ export async function saveOnboarding(formData: FormData) {
   const fullName = (formData.get("full_name") as string | null)?.trim() ?? "";
   const schoolYear = (formData.get("school_year") as string | null)?.trim() ?? "";
   const securityClearanceRaw = formData.get("security_clearance_eligible");
+  const minimumApprenticeshipLevel = Number(
+    formData.get("minimum_apprenticeship_level")
+  );
 
   const errors: string[] = [];
   if (!fullName) errors.push("Full name is required");
@@ -76,6 +79,12 @@ export async function saveOnboarding(formData: FormData) {
     errors.push("Pick a commute radius");
   if (rightToWorkRaw !== "yes" && rightToWorkRaw !== "no")
     errors.push("Right-to-work status is required");
+  if (
+    !Number.isInteger(minimumApprenticeshipLevel) ||
+    minimumApprenticeshipLevel < 2 ||
+    minimumApprenticeshipLevel > 7
+  )
+    errors.push("Pick a minimum apprenticeship level");
 
   if (errors.length > 0) {
     redirect(`/onboarding?error=${encodeURIComponent(errors.join("; "))}`);
@@ -101,6 +110,7 @@ export async function saveOnboarding(formData: FormData) {
       postcode,
       right_to_work: rightToWorkRaw === "yes",
       security_clearance_eligible: securityClearanceEligible,
+      minimum_apprenticeship_level: minimumApprenticeshipLevel,
       onboarding_complete: true,
     })
     .eq("user_id", user.id);
