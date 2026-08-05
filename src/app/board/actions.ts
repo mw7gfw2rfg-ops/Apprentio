@@ -3,12 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-
-// These four are the only manual, post-submission outcomes — they happen
-// outside the app (an employer calls, emails, or goes quiet) so someone has
-// to tell the board. Deliberately excludes every other stage: this action
-// only ever fires from 'submitted', not a general stage-jumper.
-const MANUAL_OUTCOME_STAGES = ["interview", "offer", "rejected", "withdrawn"] as const;
+import { ALLOWED_STATUS_TRANSITIONS } from "./constants";
 
 export async function updateApplicationStatus(formData: FormData) {
   const supabase = await createClient();
@@ -25,11 +20,24 @@ export async function updateApplicationStatus(formData: FormData) {
   if (typeof applicationId !== "string" || !applicationId) {
     redirect("/board?error=Missing application");
   }
-  if (
-    typeof newStage !== "string" ||
-    !(MANUAL_OUTCOME_STAGES as readonly string[]).includes(newStage)
-  ) {
+  if (typeof newStage !== "string" || !newStage) {
     redirect("/board?error=Invalid status");
+  }
+
+  const { data: application } = await supabase
+    .from("applications")
+    .select("stage")
+    .eq("id", applicationId)
+    .eq("user_id", user.id)
+    .single();
+
+  const currentStage = application?.stage;
+  const allowedTargets = currentStage
+    ? ALLOWED_STATUS_TRANSITIONS[currentStage]
+    : undefined;
+
+  if (!allowedTargets || !allowedTargets.includes(newStage)) {
+    redirect("/board?error=Invalid status transition");
   }
 
   const { error } = await supabase
@@ -37,7 +45,7 @@ export async function updateApplicationStatus(formData: FormData) {
     .update({ stage: newStage })
     .eq("id", applicationId)
     .eq("user_id", user.id)
-    .eq("stage", "submitted");
+    .eq("stage", currentStage); // compare-and-swap against the stage just validated
 
   if (error) {
     redirect(`/board?error=${encodeURIComponent(error.message)}`);

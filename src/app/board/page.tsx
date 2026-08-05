@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { updateApplicationStatus } from "./actions";
+import { ALLOWED_STATUS_TRANSITIONS } from "./constants";
 
 const STAGES = [
   { key: "saved", label: "Saved" },
@@ -15,12 +16,9 @@ const STAGES = [
   { key: "withdrawn", label: "Withdrawn" },
 ] as const;
 
-const UPDATE_STATUS_OPTIONS = [
-  { value: "interview", label: "Interview" },
-  { value: "offer", label: "Offer" },
-  { value: "rejected", label: "Rejected" },
-  { value: "withdrawn", label: "Withdrawn" },
-] as const;
+const STAGE_LABELS: Record<string, string> = Object.fromEntries(
+  STAGES.map((stage) => [stage.key, stage.label])
+);
 
 type BoardApplication = {
   id: string;
@@ -127,7 +125,7 @@ export default async function BoardPage({
                         </Link>
                       )}
 
-                      {stage.key === "submitted" && (
+                      {ALLOWED_STATUS_TRANSITIONS[stage.key] && (
                         <form className="mt-2 flex flex-col gap-1">
                           <input
                             type="hidden"
@@ -142,9 +140,9 @@ export default async function BoardPage({
                             <option value="" disabled>
                               Update status…
                             </option>
-                            {UPDATE_STATUS_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
+                            {ALLOWED_STATUS_TRANSITIONS[stage.key].map((target) => (
+                              <option key={target} value={target}>
+                                {STAGE_LABELS[target]}
                               </option>
                             ))}
                           </select>
