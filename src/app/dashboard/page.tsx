@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "../login/actions";
@@ -29,6 +30,9 @@ export default async function DashboardPage() {
       <p className="text-sm">
         Subscription: {profile?.subscription_tier ?? "free"} — onboarding complete
       </p>
+      <Link href="/discovery" className="text-sm underline">
+        Browse apprenticeships
+      </Link>
       <form>
         <button
           formAction={signOut}

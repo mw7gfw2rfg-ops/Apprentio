@@ -19,6 +19,8 @@ function toVacancyRow(vacancy: FaaVacancy) {
       : null,
     location: location || null,
     postcode: address?.postcode ?? null,
+    latitude: address?.latitude ?? null,
+    longitude: address?.longitude ?? null,
     closing_date: vacancy.closingDate?.slice(0, 10) ?? null,
     apply_url: vacancy.vacancyUrl,
     description: vacancy.description,
