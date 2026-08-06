@@ -44,11 +44,11 @@ export default async function AdminPage({
     <main className="mx-auto flex max-w-4xl flex-col gap-10 px-4 py-16">
       <div>
         <h1 className="text-2xl font-semibold">Admin</h1>
-        <p className="text-sm text-neutral-500">employer_sources and curated vacancies.</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">employer_sources and curated vacancies.</p>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {success && <p className="text-sm text-green-600">{success}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {success && <p className="text-sm text-green-600 dark:text-green-400">{success}</p>}
 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-medium">Employers ({employers?.length ?? 0})</h2>
@@ -105,7 +105,7 @@ export default async function AdminPage({
                 <span>
                   Last verified{" "}
                   {employer.last_verified_at && (
-                    <span className="text-xs text-neutral-400">
+                    <span className="text-xs text-neutral-400 dark:text-neutral-500">
                       ({new Date(employer.last_verified_at).toLocaleDateString()})
                     </span>
                   )}
@@ -163,7 +163,7 @@ export default async function AdminPage({
           </label>
           <button
             formAction={addEmployerSource}
-            className="self-start rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97] sm:col-span-2"
+            className="self-start rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97] dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 sm:col-span-2"
           >
             Add employer
           </button>
@@ -172,7 +172,7 @@ export default async function AdminPage({
 
       <section className="flex flex-col gap-3 border-t pt-6">
         <h2 className="text-lg font-medium">Add curated vacancy</h2>
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           For employers who post directly rather than via the Find an Apprenticeship API
           — e.g. GCHQ once its window opens.
         </p>
@@ -212,7 +212,7 @@ export default async function AdminPage({
           <label className="flex flex-col gap-1">
             Start date
             <input name="start_date" type="date" className={inputClass} />
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs text-neutral-400 dark:text-neutral-500">
               Leave blank if not yet announced.
             </span>
           </label>
@@ -249,7 +249,7 @@ export default async function AdminPage({
           </label>
           <button
             formAction={addCuratedVacancy}
-            className="self-start rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97] sm:col-span-2"
+            className="self-start rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97] dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 sm:col-span-2"
           >
             Add curated vacancy
           </button>

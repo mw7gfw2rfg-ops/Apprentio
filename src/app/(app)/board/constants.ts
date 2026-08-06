@@ -12,11 +12,11 @@ export const ALLOWED_STATUS_TRANSITIONS: Record<string, readonly string[]> = {
 export const STAGES = [
   { key: "saved", label: "Saved", dot: "bg-neutral-400 dark:bg-neutral-600" },
   { key: "drafting", label: "Drafting", dot: "bg-neutral-400 dark:bg-neutral-600" },
-  { key: "ready_for_review", label: "Ready for review", dot: "bg-amber-500" },
-  { key: "approved", label: "Approved", dot: "bg-indigo-500" },
-  { key: "submitted", label: "Submitted", dot: "bg-indigo-500" },
-  { key: "interview", label: "Interview", dot: "bg-violet-500" },
-  { key: "offer", label: "Offer", dot: "bg-emerald-500" },
+  { key: "ready_for_review", label: "Ready for review", dot: "bg-amber-500 dark:bg-amber-400" },
+  { key: "approved", label: "Approved", dot: "bg-indigo-500 dark:bg-indigo-400" },
+  { key: "submitted", label: "Submitted", dot: "bg-indigo-500 dark:bg-indigo-400" },
+  { key: "interview", label: "Interview", dot: "bg-violet-500 dark:bg-violet-400" },
+  { key: "offer", label: "Offer", dot: "bg-emerald-500 dark:bg-emerald-400" },
   { key: "rejected", label: "Rejected", dot: "bg-neutral-400 dark:bg-neutral-600" },
   { key: "withdrawn", label: "Withdrawn", dot: "bg-neutral-400 dark:bg-neutral-600" },
 ] as const;

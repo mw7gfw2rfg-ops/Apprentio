@@ -74,16 +74,16 @@ export default async function ApplicationsPage({
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-4 py-16">
       <div>
         <h1 className="text-2xl font-semibold">My applications</h1>
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           Subscription: {profile.subscription_tier}
           {!isPremium && ` — ${freeDraftsRemaining} free draft${freeDraftsRemaining === 1 ? "" : "s"} left`}
         </p>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       {(applications ?? []).length === 0 && (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           Nothing saved yet — save a vacancy from Discover apprenticeships first.
         </p>
       )}
@@ -102,9 +102,9 @@ export default async function ApplicationsPage({
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="font-medium">{vacancy.role_title}</h2>
-                  <p className="text-sm text-neutral-500">{vacancy.employer_name}</p>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">{vacancy.employer_name}</p>
                 </div>
-                <span className="rounded-full border px-2 py-0.5 text-xs uppercase text-neutral-500">
+                <span className="rounded-full border px-2 py-0.5 text-xs uppercase text-neutral-500 dark:text-neutral-400">
                   {application.stage.replaceAll("_", " ")}
                 </span>
               </div>
@@ -112,7 +112,7 @@ export default async function ApplicationsPage({
               {application.stage === "saved" && (
                 <div className="mt-3 flex flex-col gap-2">
                   {application.draft_notes && (
-                    <p className="text-sm text-neutral-500">
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
                       Last draft rejected: {application.draft_notes}
                     </p>
                   )}
@@ -127,7 +127,7 @@ export default async function ApplicationsPage({
                     </button>
                   )}
                   {canDraft && !hasBaseDocuments && (
-                    <p className="text-sm text-red-600">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       Upload your base CV and cover letter in your profile before drafting.
                     </p>
                   )}
@@ -138,7 +138,7 @@ export default async function ApplicationsPage({
                         <DraftSubmitButton />
                       </form>
                       {!isPremium && (
-                        <p className="text-xs text-neutral-400">
+                        <p className="text-xs text-neutral-400 dark:text-neutral-500">
                           {freeDraftsRemaining} free draft
                           {freeDraftsRemaining === 1 ? "" : "s"} remaining
                         </p>
@@ -153,7 +153,7 @@ export default async function ApplicationsPage({
                   <form className="flex flex-col gap-3">
                     <input type="hidden" name="application_id" value={application.id} />
                     <label className="flex flex-col gap-1">
-                      <span className="text-xs uppercase text-neutral-400">Tailored CV</span>
+                      <span className="text-xs uppercase text-neutral-400 dark:text-neutral-500">Tailored CV</span>
                       <textarea
                         name="drafted_cv"
                         defaultValue={application.drafted_cv ?? ""}
@@ -162,7 +162,7 @@ export default async function ApplicationsPage({
                       />
                     </label>
                     <label className="flex flex-col gap-1">
-                      <span className="text-xs uppercase text-neutral-400">
+                      <span className="text-xs uppercase text-neutral-400 dark:text-neutral-500">
                         Tailored cover letter
                       </span>
                       <textarea
@@ -181,7 +181,7 @@ export default async function ApplicationsPage({
                       </button>
                       <button
                         formAction={approveApplication}
-                        className="rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97]"
+                        className="rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97] dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300"
                       >
                         Approve
                       </button>
@@ -190,7 +190,7 @@ export default async function ApplicationsPage({
                   <form className="flex flex-col gap-1">
                     <input type="hidden" name="application_id" value={application.id} />
                     <label className="flex flex-col gap-1">
-                      <span className="text-xs uppercase text-neutral-400">
+                      <span className="text-xs uppercase text-neutral-400 dark:text-neutral-500">
                         Reject — reason (required)
                       </span>
                       <div className="flex gap-2">
@@ -202,7 +202,7 @@ export default async function ApplicationsPage({
                         />
                         <button
                           formAction={rejectApplication}
-                          className="rounded border px-3 py-1.5 text-sm text-red-600 transition-transform active:scale-[0.97]"
+                          className="rounded border px-3 py-1.5 text-sm text-red-600 dark:text-red-400 transition-transform active:scale-[0.97]"
                         >
                           Reject
                         </button>
@@ -214,17 +214,17 @@ export default async function ApplicationsPage({
 
               {application.stage === "approved" && (
                 <div className="mt-3 flex flex-col gap-3 text-sm">
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-xs text-neutral-400 dark:text-neutral-500">
                     Approved {application.approved_at && new Date(application.approved_at).toLocaleString()}
                   </p>
                   <div>
-                    <h3 className="text-xs uppercase text-neutral-400">Final CV</h3>
+                    <h3 className="text-xs uppercase text-neutral-400 dark:text-neutral-500">Final CV</h3>
                     <pre className="mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded bg-neutral-50 p-3 text-xs dark:bg-neutral-900">
                       {application.drafted_cv}
                     </pre>
                   </div>
                   <div>
-                    <h3 className="text-xs uppercase text-neutral-400">Final cover letter</h3>
+                    <h3 className="text-xs uppercase text-neutral-400 dark:text-neutral-500">Final cover letter</h3>
                     <pre className="mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded bg-neutral-50 p-3 text-xs dark:bg-neutral-900">
                       {application.drafted_cover_letter}
                     </pre>
@@ -252,7 +252,7 @@ export default async function ApplicationsPage({
               )}
 
               {application.stage === "submitted" && (
-                <p className="mt-3 text-sm text-neutral-500">
+                <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
                   Submitted {application.submitted_at && new Date(application.submitted_at).toLocaleString()}
                 </p>
               )}

@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { signOut } from "@/app/login/actions";
 import { createCheckoutSession, createPortalSession } from "@/app/billing/actions";
 
@@ -112,6 +113,9 @@ export function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
+        <div className="px-1 pb-1 group-data-[collapsible=icon]:hidden">
+          <ThemeToggle />
+        </div>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
