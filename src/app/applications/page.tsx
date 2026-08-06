@@ -7,6 +7,7 @@ import {
   markSubmitted,
   rejectApplication,
 } from "./actions";
+import { DraftSubmitButton } from "./DraftSubmitButton";
 
 const FREE_DRAFT_LIMIT = 2;
 
@@ -132,14 +133,9 @@ export default async function ApplicationsPage({
                   )}
                   {canDraft && hasBaseDocuments && (
                     <div className="flex flex-col gap-1">
-                      <form>
+                      <form action={draftApplication}>
                         <input type="hidden" name="application_id" value={application.id} />
-                        <button
-                          formAction={draftApplication}
-                          className="rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
-                        >
-                          Draft
-                        </button>
+                        <DraftSubmitButton />
                       </form>
                       {!isPremium && (
                         <p className="text-xs text-neutral-400">

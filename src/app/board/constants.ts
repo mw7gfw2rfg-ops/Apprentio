@@ -8,3 +8,19 @@ export const ALLOWED_STATUS_TRANSITIONS: Record<string, readonly string[]> = {
   submitted: ["interview", "offer", "rejected", "withdrawn"],
   interview: ["offer", "rejected", "withdrawn"],
 };
+
+export const STAGES = [
+  { key: "saved", label: "Saved", dot: "bg-neutral-400 dark:bg-neutral-600" },
+  { key: "drafting", label: "Drafting", dot: "bg-neutral-400 dark:bg-neutral-600" },
+  { key: "ready_for_review", label: "Ready for review", dot: "bg-amber-500" },
+  { key: "approved", label: "Approved", dot: "bg-indigo-500" },
+  { key: "submitted", label: "Submitted", dot: "bg-indigo-500" },
+  { key: "interview", label: "Interview", dot: "bg-violet-500" },
+  { key: "offer", label: "Offer", dot: "bg-emerald-500" },
+  { key: "rejected", label: "Rejected", dot: "bg-neutral-400 dark:bg-neutral-600" },
+  { key: "withdrawn", label: "Withdrawn", dot: "bg-neutral-400 dark:bg-neutral-600" },
+] as const;
+
+export const STAGE_LABELS: Record<string, string> = Object.fromEntries(
+  STAGES.map((stage) => [stage.key, stage.label])
+);
