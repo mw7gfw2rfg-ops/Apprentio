@@ -8,6 +8,8 @@ import {
   rejectApplication,
 } from "./actions";
 
+const FREE_DRAFT_LIMIT = 2;
+
 type ApplicationRow = {
   id: string;
   stage: string;
@@ -42,7 +44,7 @@ export default async function ApplicationsPage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "onboarding_complete, subscription_tier, base_cv_storage_path, base_cover_letter_storage_path"
+      "onboarding_complete, subscription_tier, free_drafts_used, base_cv_storage_path, base_cover_letter_storage_path"
     )
     .eq("user_id", user.id)
     .single();
@@ -52,6 +54,8 @@ export default async function ApplicationsPage({
   }
 
   const isPremium = profile.subscription_tier === "premium";
+  const freeDraftsRemaining = Math.max(0, FREE_DRAFT_LIMIT - profile.free_drafts_used);
+  const canDraft = isPremium || freeDraftsRemaining > 0;
   const hasBaseDocuments = Boolean(
     profile.base_cv_storage_path && profile.base_cover_letter_storage_path
   );
@@ -71,6 +75,7 @@ export default async function ApplicationsPage({
         <h1 className="text-2xl font-semibold">My applications</h1>
         <p className="text-sm text-neutral-500">
           Subscription: {profile.subscription_tier}
+          {!isPremium && ` — ${freeDraftsRemaining} free draft${freeDraftsRemaining === 1 ? "" : "s"} left`}
         </p>
       </div>
 
@@ -110,31 +115,39 @@ export default async function ApplicationsPage({
                       Last draft rejected: {application.draft_notes}
                     </p>
                   )}
-                  {!isPremium && (
+                  {!canDraft && (
                     <button
                       type="button"
                       disabled
-                      title="Upgrade to premium to unlock AI drafting"
+                      title="Upgrade to premium to unlock unlimited AI drafting"
                       className="rounded border px-3 py-1.5 text-sm opacity-50"
                     >
                       Upgrade to draft a tailored CV & cover letter for this application
                     </button>
                   )}
-                  {isPremium && !hasBaseDocuments && (
+                  {canDraft && !hasBaseDocuments && (
                     <p className="text-sm text-red-600">
                       Upload your base CV and cover letter in your profile before drafting.
                     </p>
                   )}
-                  {isPremium && hasBaseDocuments && (
-                    <form>
-                      <input type="hidden" name="application_id" value={application.id} />
-                      <button
-                        formAction={draftApplication}
-                        className="rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
-                      >
-                        Draft
-                      </button>
-                    </form>
+                  {canDraft && hasBaseDocuments && (
+                    <div className="flex flex-col gap-1">
+                      <form>
+                        <input type="hidden" name="application_id" value={application.id} />
+                        <button
+                          formAction={draftApplication}
+                          className="rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
+                        >
+                          Draft
+                        </button>
+                      </form>
+                      {!isPremium && (
+                        <p className="text-xs text-neutral-400">
+                          {freeDraftsRemaining} free draft
+                          {freeDraftsRemaining === 1 ? "" : "s"} remaining
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               )}

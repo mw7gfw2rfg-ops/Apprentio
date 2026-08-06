@@ -3,7 +3,10 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { generateDraft } from "@/lib/drafting/draft";
+
+const FREE_DRAFT_LIMIT = 2;
 
 export async function draftApplication(formData: FormData) {
   const supabase = await createClient();
@@ -20,19 +23,28 @@ export async function draftApplication(formData: FormData) {
     redirect("/applications?error=Missing application");
   }
 
-  // Mandatory server-side gate — the UI hides the real Draft button from
-  // free-tier users, but that's UX only. This check is what actually stops
-  // the Anthropic API from being called for a non-premium account.
+  // Mandatory server-side gate — the UI hides the real Draft button once a
+  // free-tier user is out of drafts, but that's UX only. This check is what
+  // actually stops the Anthropic API from being called beyond the cap.
   const { data: profile } = await supabase
     .from("profiles")
-    .select("subscription_tier, base_cv_storage_path, base_cover_letter_storage_path")
+    .select(
+      "subscription_tier, free_drafts_used, base_cv_storage_path, base_cover_letter_storage_path"
+    )
     .eq("user_id", user.id)
     .single();
 
-  if (profile?.subscription_tier !== "premium") {
+  if (!profile) {
+    redirect("/applications?error=Profile not found");
+  }
+
+  const isPremium = profile.subscription_tier === "premium";
+  if (!isPremium && profile.free_drafts_used >= FREE_DRAFT_LIMIT) {
     redirect(
       "/applications?error=" +
-        encodeURIComponent("Upgrade to premium to draft a tailored CV and cover letter")
+        encodeURIComponent(
+          `You've used your ${FREE_DRAFT_LIMIT} free drafts — upgrade to premium for unlimited drafts`
+        )
     );
   }
 
@@ -86,6 +98,19 @@ export async function draftApplication(formData: FormData) {
 
     if (error) {
       throw new Error(error.message);
+    }
+
+    // free_drafts_used isn't writable by the authenticated role (see the
+    // column-lockdown migration) — this admin-client write is safe because
+    // the draft actually succeeded and every check above already confirmed
+    // this is the real, authenticated owner of the application.
+    const admin = createAdminClient();
+    const { error: countError } = await admin
+      .from("profiles")
+      .update({ free_drafts_used: profile.free_drafts_used + 1 })
+      .eq("user_id", user.id);
+    if (countError) {
+      throw new Error(countError.message);
     }
   } catch (err) {
     redirect(
