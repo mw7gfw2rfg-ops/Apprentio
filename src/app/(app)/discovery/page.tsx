@@ -16,6 +16,7 @@ type VacancyRow = {
   location: string | null;
   postcode: string | null;
   closing_date: string | null;
+  start_date: string | null;
   apply_url: string | null;
   latitude: number | null;
   longitude: number | null;
@@ -83,7 +84,7 @@ export default async function DiscoveryPage({
       let vacanciesQuery = supabase
         .from("vacancies")
         .select(
-          "id, employer_name, role_title, apprenticeship_level, sector, location, postcode, closing_date, apply_url, latitude, longitude"
+          "id, employer_name, role_title, apprenticeship_level, sector, location, postcode, closing_date, start_date, apply_url, latitude, longitude"
         )
         .gte("closing_date", today)
         .overlaps("sector", routes)
@@ -207,6 +208,11 @@ export default async function DiscoveryPage({
                 <Pill>Level {vacancy.apprenticeship_level ?? "—"}</Pill>
                 <Pill>{vacancy.location ?? vacancy.postcode ?? "—"}</Pill>
                 <Pill>Closes {vacancy.closing_date ?? "—"}</Pill>
+                <Pill>
+                  {vacancy.start_date
+                    ? `Starts ${vacancy.start_date}`
+                    : "Start date not specified"}
+                </Pill>
               </div>
               {vacancy.apply_url && (
                 <a

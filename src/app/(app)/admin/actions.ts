@@ -106,6 +106,7 @@ export async function addCuratedVacancy(formData: FormData) {
     role_title: formData.get("role_title"),
     apprenticeship_level: formData.get("apprenticeship_level"),
     closing_date: formData.get("closing_date"),
+    start_date: (formData.get("start_date") as string | null) || undefined,
     apply_url: formData.get("apply_url"),
     sector: formData.getAll("sector"),
     standard_reference: (formData.get("standard_reference") as string | null) || undefined,

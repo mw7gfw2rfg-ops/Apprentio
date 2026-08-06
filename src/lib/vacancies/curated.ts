@@ -7,6 +7,7 @@ export type CuratedVacancyInput = {
   role_title: string;
   apprenticeship_level: number;
   closing_date: string;
+  start_date?: string;
   apply_url: string;
   sector?: string[];
   standard_reference?: string;
@@ -116,6 +117,7 @@ export async function upsertCuratedVacancy(
     latitude,
     longitude,
     closing_date: input.closing_date,
+    start_date: input.start_date ?? null,
     apply_url: input.apply_url,
     description: input.description ?? null,
     raw_json: input,

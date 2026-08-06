@@ -209,6 +209,13 @@ export default async function AdminPage({
             Closing date
             <input name="closing_date" type="date" required className={inputClass} />
           </label>
+          <label className="flex flex-col gap-1">
+            Start date
+            <input name="start_date" type="date" className={inputClass} />
+            <span className="text-xs text-neutral-400">
+              Leave blank if not yet announced.
+            </span>
+          </label>
           <label className="flex flex-col gap-1 sm:col-span-2">
             Apply URL
             <input name="apply_url" type="url" required placeholder="https://…" className={inputClass} />

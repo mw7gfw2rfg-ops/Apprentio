@@ -16,6 +16,8 @@
 //   role_title           required
 //   apprenticeship_level required, int 2-7
 //   closing_date         required, YYYY-MM-DD
+//   start_date           optional, YYYY-MM-DD — left unset shows as "Start date not
+//                          specified" on Discovery rather than a blank or fake date
 //   apply_url            required — the real employer application URL once it's live
 //   sector               optional string[], using our onboarding sector names (e.g.
 //                          "Cybersecurity", "Government & Defence" — see
