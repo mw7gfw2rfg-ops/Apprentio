@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createStripeClient } from "@/lib/stripe/client";
+import { getSiteUrl } from "@/lib/site-url";
 
 // Never writes profiles.subscription_tier or the subscriptions table —
 // that's the webhook's job exclusively (PLAN.md §7). This only ever talks
@@ -34,7 +35,7 @@ export async function createCheckoutSession() {
     .maybeSingle();
 
   const stripe = createStripeClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const siteUrl = getSiteUrl();
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
@@ -76,7 +77,7 @@ export async function createPortalSession() {
   const stripe = createStripeClient();
   const session = await stripe.billingPortal.sessions.create({
     customer: sub.stripe_customer_id,
-    return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
+    return_url: `${getSiteUrl()}/dashboard`,
   });
 
   redirect(session.url);
