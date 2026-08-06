@@ -71,7 +71,7 @@ export default async function DashboardPage({
             formAction={createCheckoutSession}
             className="rounded bg-black px-3 py-2 text-sm text-white transition-transform active:scale-[0.97]"
           >
-            Upgrade to Premium — £4.99/mo
+            Upgrade to Premium — £7.99/mo
           </button>
         </form>
       )}
