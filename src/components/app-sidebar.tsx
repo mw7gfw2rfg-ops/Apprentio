@@ -27,6 +27,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -123,27 +124,29 @@ export function AppSidebar({
                 <ChevronsUpDown className="ml-auto size-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="min-w-56 rounded-lg" side="top" align="end">
-                <DropdownMenuLabel className="p-0 font-normal">
-                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <Avatar className="size-8 rounded-lg">
-                      <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                        {initial}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-medium">{email}</span>
-                      <Badge
-                        variant={isPremium ? "default" : "secondary"}
-                        className="mt-0.5 w-fit text-[10px]"
-                      >
-                        {isPremium ? "Premium" : "Free"}
-                      </Badge>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="p-0 font-normal">
+                    <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                      <Avatar className="size-8 rounded-lg">
+                        <AvatarFallback className="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                          {initial}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium">{email}</span>
+                        <Badge
+                          variant={isPremium ? "default" : "secondary"}
+                          className="mt-0.5 w-fit text-[10px]"
+                        >
+                          {isPremium ? "Premium" : "Free"}
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
-                </DropdownMenuLabel>
+                  </DropdownMenuLabel>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <form action={isPremium ? createPortalSession : createCheckoutSession}>
-                  <DropdownMenuItem render={<button type="submit" className="w-full" />}>
+                  <DropdownMenuItem nativeButton render={<button type="submit" className="w-full" />}>
                     <CreditCard />
                     {isPremium ? "Manage subscription" : "Upgrade to Premium"}
                   </DropdownMenuItem>
@@ -154,7 +157,7 @@ export function AppSidebar({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <form action={signOut}>
-                  <DropdownMenuItem render={<button type="submit" className="w-full" />}>
+                  <DropdownMenuItem nativeButton render={<button type="submit" className="w-full" />}>
                     <LogOut />
                     Sign out
                   </DropdownMenuItem>
