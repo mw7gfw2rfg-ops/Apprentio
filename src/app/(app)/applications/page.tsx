@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ApplicationCard } from "@/components/application-card";
+import { Badge } from "@/components/ui/badge";
 import {
   approveApplication,
   draftApplication,
@@ -7,7 +9,6 @@ import {
   markSubmitted,
   rejectApplication,
 } from "./actions";
-import { DraftSubmitButton } from "./DraftSubmitButton";
 
 const FREE_DRAFT_LIMIT = 2;
 
@@ -71,207 +72,47 @@ export default async function ApplicationsPage({
     .returns<ApplicationRow[]>();
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-4 py-16">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-10">
       <div>
-        <h1 className="text-2xl font-semibold">My applications</h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          Subscription: {profile.subscription_tier}
-          {!isPremium && ` — ${freeDraftsRemaining} free draft${freeDraftsRemaining === 1 ? "" : "s"} left`}
+        <h1 className="text-3xl font-semibold tracking-tight">My applications</h1>
+        <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+          <Badge variant={isPremium ? "default" : "secondary"}>
+            {isPremium ? "Premium" : "Free"}
+          </Badge>
+          {!isPremium &&
+            `${freeDraftsRemaining} free draft${freeDraftsRemaining === 1 ? "" : "s"} left`}
         </p>
       </div>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+          {error}
+        </p>
+      )}
 
       {(applications ?? []).length === 0 && (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="text-sm text-muted-foreground">
           Nothing saved yet — save a vacancy from Discover apprenticeships first.
         </p>
       )}
 
-      <ul className="flex flex-col gap-4">
-        {(applications ?? []).map((application) => {
-          const vacancy = application.vacancies;
-          if (!vacancy) return null;
-
-          return (
-            <li
-              key={application.id}
-              id={`application-${application.id}`}
-              className="scroll-mt-4 rounded border p-4"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-medium">{vacancy.role_title}</h2>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">{vacancy.employer_name}</p>
-                </div>
-                <span className="rounded-full border px-2 py-0.5 text-xs uppercase text-neutral-500 dark:text-neutral-400">
-                  {application.stage.replaceAll("_", " ")}
-                </span>
-              </div>
-
-              {application.stage === "saved" && (
-                <div className="mt-3 flex flex-col gap-2">
-                  {application.draft_notes && (
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                      Last draft rejected: {application.draft_notes}
-                    </p>
-                  )}
-                  {!canDraft && (
-                    <button
-                      type="button"
-                      disabled
-                      title="Upgrade to premium to unlock unlimited AI drafting"
-                      className="rounded border px-3 py-1.5 text-sm opacity-50"
-                    >
-                      Upgrade to draft a tailored CV & cover letter for this application
-                    </button>
-                  )}
-                  {canDraft && !hasBaseDocuments && (
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      Upload your base CV and cover letter in your profile before drafting.
-                    </p>
-                  )}
-                  {canDraft && hasBaseDocuments && (
-                    <div className="flex flex-col gap-1">
-                      <form action={draftApplication}>
-                        <input type="hidden" name="application_id" value={application.id} />
-                        <DraftSubmitButton />
-                      </form>
-                      {!isPremium && (
-                        <p className="text-xs text-neutral-400 dark:text-neutral-500">
-                          {freeDraftsRemaining} free draft
-                          {freeDraftsRemaining === 1 ? "" : "s"} remaining
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {application.stage === "ready_for_review" && (
-                <div className="mt-3 flex flex-col gap-3 text-sm">
-                  <form className="flex flex-col gap-3">
-                    <input type="hidden" name="application_id" value={application.id} />
-                    <label className="flex flex-col gap-1">
-                      <span className="text-xs uppercase text-neutral-400 dark:text-neutral-500">Tailored CV</span>
-                      <textarea
-                        name="drafted_cv"
-                        defaultValue={application.drafted_cv ?? ""}
-                        rows={10}
-                        className="rounded border bg-neutral-50 p-3 font-mono text-xs dark:bg-neutral-900"
-                      />
-                    </label>
-                    <label className="flex flex-col gap-1">
-                      <span className="text-xs uppercase text-neutral-400 dark:text-neutral-500">
-                        Tailored cover letter
-                      </span>
-                      <textarea
-                        name="drafted_cover_letter"
-                        defaultValue={application.drafted_cover_letter ?? ""}
-                        rows={10}
-                        className="rounded border bg-neutral-50 p-3 font-mono text-xs dark:bg-neutral-900"
-                      />
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        formAction={editDraft}
-                        className="rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
-                      >
-                        Save edit
-                      </button>
-                      <button
-                        formAction={approveApplication}
-                        className="rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97] dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300"
-                      >
-                        Approve
-                      </button>
-                    </div>
-                  </form>
-                  <form className="flex flex-col gap-1">
-                    <input type="hidden" name="application_id" value={application.id} />
-                    <label className="flex flex-col gap-1">
-                      <span className="text-xs uppercase text-neutral-400 dark:text-neutral-500">
-                        Reject — reason (required)
-                      </span>
-                      <div className="flex gap-2">
-                        <input
-                          name="reason"
-                          required
-                          className="flex-1 rounded border px-3 py-1.5 text-sm"
-                          placeholder="e.g. tone is off, missing my NEA project"
-                        />
-                        <button
-                          formAction={rejectApplication}
-                          className="rounded border px-3 py-1.5 text-sm text-red-600 dark:text-red-400 transition-transform active:scale-[0.97]"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </label>
-                  </form>
-                </div>
-              )}
-
-              {application.stage === "approved" && (
-                <div className="mt-3 flex flex-col gap-3 text-sm">
-                  <p className="text-xs text-neutral-400 dark:text-neutral-500">
-                    Approved {application.approved_at && new Date(application.approved_at).toLocaleString()}
-                  </p>
-                  <div>
-                    <h3 className="text-xs uppercase text-neutral-400 dark:text-neutral-500">Final CV</h3>
-                    <pre className="mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded bg-neutral-50 p-3 text-xs dark:bg-neutral-900">
-                      {application.drafted_cv}
-                    </pre>
-                  </div>
-                  <div>
-                    <h3 className="text-xs uppercase text-neutral-400 dark:text-neutral-500">Final cover letter</h3>
-                    <pre className="mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap rounded bg-neutral-50 p-3 text-xs dark:bg-neutral-900">
-                      {application.drafted_cover_letter}
-                    </pre>
-                  </div>
-                  {vacancy.apply_url && (
-                    <a
-                      href={vacancy.apply_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium underline"
-                    >
-                      Apply directly on the employer/Find an Apprenticeship page →
-                    </a>
-                  )}
-                  <form>
-                    <input type="hidden" name="application_id" value={application.id} />
-                    <button
-                      formAction={markSubmitted}
-                      className="self-start rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
-                    >
-                      Mark as submitted
-                    </button>
-                  </form>
-                </div>
-              )}
-
-              {application.stage === "submitted" && (
-                <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
-                  Submitted {application.submitted_at && new Date(application.submitted_at).toLocaleString()}
-                </p>
-              )}
-
-              {(application.stage === "saved" || application.stage === "ready_for_review") &&
-                vacancy.apply_url && (
-                  <a
-                    href={vacancy.apply_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-block text-sm underline"
-                  >
-                    View on Find an Apprenticeship
-                  </a>
-                )}
-            </li>
-          );
-        })}
-      </ul>
-    </main>
+      <div className="flex flex-col gap-4">
+        {(applications ?? []).map((application) => (
+          <ApplicationCard
+            key={application.id}
+            application={application}
+            canDraft={canDraft}
+            hasBaseDocuments={hasBaseDocuments}
+            isPremium={isPremium}
+            freeDraftsRemaining={freeDraftsRemaining}
+            draftApplication={draftApplication}
+            editDraft={editDraft}
+            approveApplication={approveApplication}
+            rejectApplication={rejectApplication}
+            markSubmitted={markSubmitted}
+          />
+        ))}
+      </div>
+    </div>
   );
 }

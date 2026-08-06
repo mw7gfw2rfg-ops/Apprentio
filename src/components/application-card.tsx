@@ -1,0 +1,282 @@
+"use client";
+
+import { useState } from "react";
+import { ArrowUpRight } from "lucide-react";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { DraftSubmitButton } from "@/app/(app)/applications/DraftSubmitButton";
+
+type ApplicationRow = {
+  id: string;
+  stage: string;
+  drafted_cv: string | null;
+  drafted_cover_letter: string | null;
+  draft_notes: string | null;
+  approved_at: string | null;
+  submitted_at: string | null;
+  vacancies: {
+    employer_name: string;
+    role_title: string;
+    apply_url: string | null;
+    closing_date: string | null;
+  } | null;
+};
+
+const STAGE_BADGE_VARIANT: Record<string, "outline" | "default" | "secondary"> = {
+  saved: "outline",
+  drafting: "outline",
+  ready_for_review: "default",
+  approved: "secondary",
+  submitted: "secondary",
+};
+
+export function ApplicationCard({
+  application,
+  canDraft,
+  hasBaseDocuments,
+  isPremium,
+  freeDraftsRemaining,
+  draftApplication,
+  editDraft,
+  approveApplication,
+  rejectApplication,
+  markSubmitted,
+}: {
+  application: ApplicationRow;
+  canDraft: boolean;
+  hasBaseDocuments: boolean;
+  isPremium: boolean;
+  freeDraftsRemaining: number;
+  draftApplication: (formData: FormData) => void;
+  editDraft: (formData: FormData) => void;
+  approveApplication: (formData: FormData) => void;
+  rejectApplication: (formData: FormData) => void;
+  markSubmitted: (formData: FormData) => void;
+}) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+  const vacancy = application.vacancies;
+  if (!vacancy) return null;
+
+  return (
+    <Card id={`application-${application.id}`} className="scroll-mt-4">
+      <CardHeader>
+        <CardTitle>{vacancy.role_title}</CardTitle>
+        <CardDescription>{vacancy.employer_name}</CardDescription>
+        <CardAction>
+          <Badge variant={STAGE_BADGE_VARIANT[application.stage] ?? "outline"}>
+            {application.stage.replaceAll("_", " ")}
+          </Badge>
+        </CardAction>
+      </CardHeader>
+
+      <CardContent className="flex flex-col gap-3 text-sm">
+        {application.stage === "saved" && (
+          <>
+            {application.draft_notes && (
+              <p className="text-muted-foreground">
+                Last draft rejected: {application.draft_notes}
+              </p>
+            )}
+            {!canDraft && (
+              <Button
+                type="button"
+                disabled
+                variant="outline"
+                title="Upgrade to premium to unlock unlimited AI drafting"
+                className="self-start"
+              >
+                Upgrade to draft a tailored CV & cover letter
+              </Button>
+            )}
+            {canDraft && !hasBaseDocuments && (
+              <p className="text-destructive">
+                Upload your base CV and cover letter in your profile before drafting.
+              </p>
+            )}
+            {canDraft && hasBaseDocuments && (
+              <div className="flex flex-col gap-1">
+                <form action={draftApplication}>
+                  <input type="hidden" name="application_id" value={application.id} />
+                  <DraftSubmitButton />
+                </form>
+                {!isPremium && (
+                  <p className="text-xs text-muted-foreground">
+                    {freeDraftsRemaining} free draft
+                    {freeDraftsRemaining === 1 ? "" : "s"} remaining
+                  </p>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {application.stage === "ready_for_review" && (
+          <>
+            <p className="text-muted-foreground">
+              A tailored CV and cover letter are ready for your review.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                <DialogTrigger render={<Button />}>Review draft</DialogTrigger>
+                <DialogContent className="sm:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>{vacancy.role_title}</DialogTitle>
+                    <DialogDescription>
+                      Edit the tailored draft below, then save your edits or approve it as-is.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form action={editDraft} className="flex flex-col gap-4">
+                    <input type="hidden" name="application_id" value={application.id} />
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor={`cv-${application.id}`}>Tailored CV</Label>
+                      <Textarea
+                        id={`cv-${application.id}`}
+                        name="drafted_cv"
+                        defaultValue={application.drafted_cv ?? ""}
+                        rows={10}
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor={`cover-${application.id}`}>Tailored cover letter</Label>
+                      <Textarea
+                        id={`cover-${application.id}`}
+                        name="drafted_cover_letter"
+                        defaultValue={application.drafted_cover_letter ?? ""}
+                        rows={10}
+                        className="font-mono text-xs"
+                      />
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" formAction={editDraft} variant="outline">
+                        Save edit
+                      </Button>
+                      <Button type="submit" formAction={approveApplication}>
+                        Approve
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <form className="flex flex-col gap-1.5 border-t pt-3">
+              <input type="hidden" name="application_id" value={application.id} />
+              <Label htmlFor={`reason-${application.id}`} className="text-xs uppercase text-muted-foreground">
+                Reject — reason (required)
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id={`reason-${application.id}`}
+                  name="reason"
+                  required
+                  placeholder="e.g. tone is off, missing my NEA project"
+                  className="flex-1"
+                />
+                <Button formAction={rejectApplication} variant="outline" className="text-destructive">
+                  Reject
+                </Button>
+              </div>
+            </form>
+          </>
+        )}
+
+        {application.stage === "approved" && (
+          <>
+            <p className="text-xs text-muted-foreground">
+              Approved{" "}
+              {application.approved_at && new Date(application.approved_at).toLocaleString()}
+            </p>
+            <Dialog open={viewOpen} onOpenChange={setViewOpen}>
+              <DialogTrigger render={<Button variant="outline" className="self-start" />}>
+                View final documents
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{vacancy.role_title}</DialogTitle>
+                  <DialogDescription>The approved, final version of your draft.</DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs uppercase text-muted-foreground">Final CV</Label>
+                    <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border bg-muted/50 p-3 text-xs">
+                      {application.drafted_cv}
+                    </pre>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs uppercase text-muted-foreground">
+                      Final cover letter
+                    </Label>
+                    <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border bg-muted/50 p-3 text-xs">
+                      {application.drafted_cover_letter}
+                    </pre>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            {vacancy.apply_url && (
+              <a
+                href={vacancy.apply_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-fit items-center gap-1 text-sm font-medium text-primary hover:underline"
+              >
+                Apply directly on the employer/Find an Apprenticeship page
+                <ArrowUpRight className="size-3.5" />
+              </a>
+            )}
+            <form>
+              <input type="hidden" name="application_id" value={application.id} />
+              <Button formAction={markSubmitted} variant="outline" className="self-start">
+                Mark as submitted
+              </Button>
+            </form>
+          </>
+        )}
+
+        {application.stage === "submitted" && (
+          <p className="text-muted-foreground">
+            Submitted{" "}
+            {application.submitted_at && new Date(application.submitted_at).toLocaleString()}
+          </p>
+        )}
+      </CardContent>
+
+      {(application.stage === "saved" || application.stage === "ready_for_review") &&
+        vacancy.apply_url && (
+          <CardFooter>
+            <a
+              href={vacancy.apply_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:underline"
+            >
+              View on Find an Apprenticeship
+              <ArrowUpRight className="size-3.5" />
+            </a>
+          </CardFooter>
+        )}
+    </Card>
+  );
+}
