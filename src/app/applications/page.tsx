@@ -149,62 +149,67 @@ export default async function ApplicationsPage({
               )}
 
               {application.stage === "ready_for_review" && (
-                <form className="mt-3 flex flex-col gap-3 text-sm">
-                  <input type="hidden" name="application_id" value={application.id} />
-                  <label className="flex flex-col gap-1">
-                    <span className="text-xs uppercase text-neutral-400">Tailored CV</span>
-                    <textarea
-                      name="drafted_cv"
-                      defaultValue={application.drafted_cv ?? ""}
-                      rows={10}
-                      className="rounded border bg-neutral-50 p-3 font-mono text-xs dark:bg-neutral-900"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1">
-                    <span className="text-xs uppercase text-neutral-400">
-                      Tailored cover letter
-                    </span>
-                    <textarea
-                      name="drafted_cover_letter"
-                      defaultValue={application.drafted_cover_letter ?? ""}
-                      rows={10}
-                      className="rounded border bg-neutral-50 p-3 font-mono text-xs dark:bg-neutral-900"
-                    />
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      formAction={editDraft}
-                      className="rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
-                    >
-                      Save edit
-                    </button>
-                    <button
-                      formAction={approveApplication}
-                      className="rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97]"
-                    >
-                      Approve
-                    </button>
-                  </div>
-                  <label className="flex flex-col gap-1">
-                    <span className="text-xs uppercase text-neutral-400">
-                      Reject — reason (required)
-                    </span>
-                    <div className="flex gap-2">
-                      <input
-                        name="reason"
-                        required
-                        className="flex-1 rounded border px-3 py-1.5 text-sm"
-                        placeholder="e.g. tone is off, missing my NEA project"
+                <div className="mt-3 flex flex-col gap-3 text-sm">
+                  <form className="flex flex-col gap-3">
+                    <input type="hidden" name="application_id" value={application.id} />
+                    <label className="flex flex-col gap-1">
+                      <span className="text-xs uppercase text-neutral-400">Tailored CV</span>
+                      <textarea
+                        name="drafted_cv"
+                        defaultValue={application.drafted_cv ?? ""}
+                        rows={10}
+                        className="rounded border bg-neutral-50 p-3 font-mono text-xs dark:bg-neutral-900"
                       />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-xs uppercase text-neutral-400">
+                        Tailored cover letter
+                      </span>
+                      <textarea
+                        name="drafted_cover_letter"
+                        defaultValue={application.drafted_cover_letter ?? ""}
+                        rows={10}
+                        className="rounded border bg-neutral-50 p-3 font-mono text-xs dark:bg-neutral-900"
+                      />
+                    </label>
+                    <div className="flex flex-wrap gap-2">
                       <button
-                        formAction={rejectApplication}
-                        className="rounded border px-3 py-1.5 text-sm text-red-600 transition-transform active:scale-[0.97]"
+                        formAction={editDraft}
+                        className="rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97]"
                       >
-                        Reject
+                        Save edit
+                      </button>
+                      <button
+                        formAction={approveApplication}
+                        className="rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97]"
+                      >
+                        Approve
                       </button>
                     </div>
-                  </label>
-                </form>
+                  </form>
+                  <form className="flex flex-col gap-1">
+                    <input type="hidden" name="application_id" value={application.id} />
+                    <label className="flex flex-col gap-1">
+                      <span className="text-xs uppercase text-neutral-400">
+                        Reject — reason (required)
+                      </span>
+                      <div className="flex gap-2">
+                        <input
+                          name="reason"
+                          required
+                          className="flex-1 rounded border px-3 py-1.5 text-sm"
+                          placeholder="e.g. tone is off, missing my NEA project"
+                        />
+                        <button
+                          formAction={rejectApplication}
+                          className="rounded border px-3 py-1.5 text-sm text-red-600 transition-transform active:scale-[0.97]"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </label>
+                  </form>
+                </div>
               )}
 
               {application.stage === "approved" && (
