@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "../login/actions";
 import { createCheckoutSession, createPortalSession } from "../billing/actions";
+import { isAdminEmail } from "@/lib/admin";
 
 export default async function DashboardPage({
   searchParams,
@@ -56,6 +57,11 @@ export default async function DashboardPage({
       <Link href="/board" className="text-sm underline">
         Application board
       </Link>
+      {isAdminEmail(user.email) && (
+        <Link href="/admin" className="text-sm underline">
+          Admin
+        </Link>
+      )}
       {isPremium ? (
         <form>
           <button
