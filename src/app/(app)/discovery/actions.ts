@@ -30,4 +30,5 @@ export async function saveVacancy(formData: FormData) {
   }
 
   revalidatePath("/discovery");
+  revalidatePath(`/vacancies/${vacancyId}`);
 }

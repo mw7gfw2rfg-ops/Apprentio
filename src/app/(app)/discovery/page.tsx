@@ -1,10 +1,10 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { geocodePostcode } from "@/lib/vacancies/geocode";
 import { haversineMiles, maxCommuteMiles } from "@/lib/vacancies/distance";
 import { sectorsToFaaRoutes } from "@/lib/vacancies/sector-mapping";
+import { Pill } from "@/components/vacancy-pill";
 import { saveVacancy } from "./actions";
 
 type VacancyRow = {
@@ -17,30 +17,9 @@ type VacancyRow = {
   postcode: string | null;
   closing_date: string | null;
   start_date: string | null;
-  apply_url: string | null;
   latitude: number | null;
   longitude: number | null;
 };
-
-function Pill({
-  children,
-  accent = false,
-}: {
-  children: ReactNode;
-  accent?: boolean;
-}) {
-  return (
-    <span
-      className={
-        accent
-          ? "inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-300"
-          : "inline-flex items-center rounded-full border border-neutral-200 px-2.5 py-1 text-xs text-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
-      }
-    >
-      {children}
-    </span>
-  );
-}
 
 export default async function DiscoveryPage({
   searchParams,
@@ -84,7 +63,7 @@ export default async function DiscoveryPage({
       let vacanciesQuery = supabase
         .from("vacancies")
         .select(
-          "id, employer_name, role_title, apprenticeship_level, sector, location, postcode, closing_date, start_date, apply_url, latitude, longitude"
+          "id, employer_name, role_title, apprenticeship_level, sector, location, postcode, closing_date, start_date, latitude, longitude"
         )
         .gte("closing_date", today)
         .overlaps("sector", routes)
@@ -177,53 +156,41 @@ export default async function DiscoveryPage({
           return (
             <li
               key={vacancy.id}
-              className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
+              className="relative rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-base font-semibold tracking-tight">
-                    {vacancy.role_title}
-                  </h2>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                    {vacancy.employer_name}
-                  </p>
+              <Link href={`/vacancies/${vacancy.id}`} className="block pr-24">
+                <h2 className="text-base font-semibold tracking-tight">
+                  {vacancy.role_title}
+                </h2>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                  {vacancy.employer_name}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Pill accent>{vacancy.distanceMiles.toFixed(1)} mi</Pill>
+                  <Pill>Level {vacancy.apprenticeship_level ?? "—"}</Pill>
+                  <Pill>{vacancy.location ?? vacancy.postcode ?? "—"}</Pill>
+                  <Pill>Closes {vacancy.closing_date ?? "—"}</Pill>
+                  <Pill>
+                    {vacancy.start_date
+                      ? `Starts ${vacancy.start_date}`
+                      : "Start date not specified"}
+                  </Pill>
                 </div>
-                <form className="shrink-0">
-                  <input type="hidden" name="vacancy_id" value={vacancy.id} />
-                  <button
-                    formAction={saveVacancy}
-                    disabled={isSaved}
-                    className={
-                      isSaved
-                        ? "rounded-full border border-neutral-200 px-4 py-1.5 text-sm font-medium text-neutral-400 dark:border-neutral-700 dark:text-neutral-500"
-                        : "rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-indigo-500 active:scale-[0.97] dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                    }
-                  >
-                    {isSaved ? "✓ Saved" : "Save"}
-                  </button>
-                </form>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Pill accent>{vacancy.distanceMiles.toFixed(1)} mi</Pill>
-                <Pill>Level {vacancy.apprenticeship_level ?? "—"}</Pill>
-                <Pill>{vacancy.location ?? vacancy.postcode ?? "—"}</Pill>
-                <Pill>Closes {vacancy.closing_date ?? "—"}</Pill>
-                <Pill>
-                  {vacancy.start_date
-                    ? `Starts ${vacancy.start_date}`
-                    : "Start date not specified"}
-                </Pill>
-              </div>
-              {vacancy.apply_url && (
-                <a
-                  href={vacancy.apply_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 inline-block text-sm text-indigo-600 underline dark:text-indigo-400"
+              </Link>
+              <form className="absolute right-4 top-4 shrink-0">
+                <input type="hidden" name="vacancy_id" value={vacancy.id} />
+                <button
+                  formAction={saveVacancy}
+                  disabled={isSaved}
+                  className={
+                    isSaved
+                      ? "rounded-full border border-neutral-200 px-4 py-1.5 text-sm font-medium text-neutral-400 dark:border-neutral-700 dark:text-neutral-500"
+                      : "rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-indigo-500 active:scale-[0.97] dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                  }
                 >
-                  View on Find an Apprenticeship
-                </a>
-              )}
+                  {isSaved ? "✓ Saved" : "Save"}
+                </button>
+              </form>
             </li>
           );
         })}

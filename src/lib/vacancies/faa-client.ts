@@ -10,13 +10,32 @@ export type FaaAddress = {
   longitude?: number;
 };
 
+export type FaaWage = {
+  wageType?: string;
+  wageUnit?: string;
+  workingWeekDescription?: string;
+  wageAdditionalInformation?: string;
+};
+
+export type FaaQualification = {
+  subject?: string;
+  grade?: string;
+  weighting?: string;
+  qualificationType?: string;
+};
+
+// Full field set confirmed against real synced raw_json (2026-08-06), not
+// just the API docs — see vacancies table raw_json for a live example.
 export type FaaVacancy = {
   title: string;
   description: string;
+  fullDescription?: string;
   closingDate: string;
   startDate: string;
+  postedDate?: string;
   addresses: FaaAddress[];
   employerName: string;
+  employerDescription?: string;
   course: {
     larsCode: number;
     title: string;
@@ -27,6 +46,18 @@ export type FaaVacancy = {
   apprenticeshipLevel: string;
   vacancyUrl: string;
   vacancyReference: string;
+  wage?: FaaWage;
+  hoursPerWeek?: number;
+  expectedDuration?: string;
+  numberOfPositions?: number;
+  qualifications?: FaaQualification[];
+  skills?: string[];
+  trainingDescription?: string;
+  outcomeDescription?: string;
+  providerName?: string;
+  ukprn?: number;
+  isDisabilityConfident?: boolean;
+  isNationalVacancy?: boolean;
 };
 
 export type FaaVacancyPage = {
