@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { geocodePostcode } from "@/lib/vacancies/geocode";
@@ -19,6 +20,26 @@ type VacancyRow = {
   latitude: number | null;
   longitude: number | null;
 };
+
+function Pill({
+  children,
+  accent = false,
+}: {
+  children: ReactNode;
+  accent?: boolean;
+}) {
+  return (
+    <span
+      className={
+        accent
+          ? "inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-300"
+          : "inline-flex items-center rounded-full border border-neutral-200 px-2.5 py-1 text-xs text-neutral-600 dark:border-neutral-700 dark:text-neutral-300"
+      }
+    >
+      {children}
+    </span>
+  );
+}
 
 export default async function DiscoveryPage({
   searchParams,
@@ -103,10 +124,10 @@ export default async function DiscoveryPage({
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-16">
       <div>
-        <h1 className="text-2xl font-semibold">Discover apprenticeships</h1>
-        <p className="text-sm text-neutral-500">
-          Matched on sector, commute radius from {profile.postcode}, and open closing
-          dates.
+        <h1 className="text-3xl font-semibold tracking-tight">Discover apprenticeships</h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+          Matched on sector, commute radius from <strong>{profile.postcode}</strong>, and
+          open closing dates.
         </p>
       </div>
 
@@ -123,7 +144,7 @@ export default async function DiscoveryPage({
       )}
 
       {profile.minimum_apprenticeship_level == null && (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           You haven&apos;t set a minimum apprenticeship level, so results below aren&apos;t
           filtered by level.{" "}
           <Link href="/onboarding" className="underline">
@@ -134,7 +155,7 @@ export default async function DiscoveryPage({
       )}
 
       {routes.length === 0 && (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           None of your sectors of interest currently map to a matchable category.
           <Link href="/onboarding" className="ml-1 underline">
             Adjust your sectors
@@ -144,7 +165,7 @@ export default async function DiscoveryPage({
       )}
 
       {!geocodeFailed && routes.length > 0 && matches.length === 0 && (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
           No vacancies currently match your profile. Check back after the next sync.
         </p>
       )}
@@ -153,47 +174,46 @@ export default async function DiscoveryPage({
         {matches.map((vacancy) => {
           const isSaved = savedIds.has(vacancy.id);
           return (
-            <li key={vacancy.id} className="rounded border p-4">
+            <li
+              key={vacancy.id}
+              className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="font-medium">{vacancy.role_title}</h2>
-                  <p className="text-sm text-neutral-500">{vacancy.employer_name}</p>
+                  <h2 className="text-base font-semibold tracking-tight">
+                    {vacancy.role_title}
+                  </h2>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                    {vacancy.employer_name}
+                  </p>
                 </div>
-                <form>
+                <form className="shrink-0">
                   <input type="hidden" name="vacancy_id" value={vacancy.id} />
                   <button
                     formAction={saveVacancy}
                     disabled={isSaved}
-                    className="rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97] disabled:opacity-50"
+                    className={
+                      isSaved
+                        ? "rounded-full border border-neutral-200 px-4 py-1.5 text-sm font-medium text-neutral-400 dark:border-neutral-700 dark:text-neutral-500"
+                        : "rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-indigo-500 active:scale-[0.97] dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                    }
                   >
-                    {isSaved ? "Saved" : "Save"}
+                    {isSaved ? "✓ Saved" : "Save"}
                   </button>
                 </form>
               </div>
-              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-neutral-600 sm:grid-cols-4">
-                <div>
-                  <dt className="text-xs uppercase text-neutral-400">Level</dt>
-                  <dd>{vacancy.apprenticeship_level ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-neutral-400">Distance</dt>
-                  <dd>{vacancy.distanceMiles.toFixed(1)} mi</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-neutral-400">Location</dt>
-                  <dd>{vacancy.location ?? vacancy.postcode ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase text-neutral-400">Closes</dt>
-                  <dd>{vacancy.closing_date ?? "—"}</dd>
-                </div>
-              </dl>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Pill accent>{vacancy.distanceMiles.toFixed(1)} mi</Pill>
+                <Pill>Level {vacancy.apprenticeship_level ?? "—"}</Pill>
+                <Pill>{vacancy.location ?? vacancy.postcode ?? "—"}</Pill>
+                <Pill>Closes {vacancy.closing_date ?? "—"}</Pill>
+              </div>
               {vacancy.apply_url && (
                 <a
                   href={vacancy.apply_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-3 inline-block text-sm underline"
+                  className="mt-3 inline-block text-sm text-indigo-600 underline dark:text-indigo-400"
                 >
                   View on Find an Apprenticeship
                 </a>

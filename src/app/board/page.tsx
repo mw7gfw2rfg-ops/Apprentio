@@ -5,15 +5,15 @@ import { updateApplicationStatus } from "./actions";
 import { ALLOWED_STATUS_TRANSITIONS } from "./constants";
 
 const STAGES = [
-  { key: "saved", label: "Saved" },
-  { key: "drafting", label: "Drafting" },
-  { key: "ready_for_review", label: "Ready for review" },
-  { key: "approved", label: "Approved" },
-  { key: "submitted", label: "Submitted" },
-  { key: "interview", label: "Interview" },
-  { key: "offer", label: "Offer" },
-  { key: "rejected", label: "Rejected" },
-  { key: "withdrawn", label: "Withdrawn" },
+  { key: "saved", label: "Saved", dot: "bg-neutral-400 dark:bg-neutral-600" },
+  { key: "drafting", label: "Drafting", dot: "bg-neutral-400 dark:bg-neutral-600" },
+  { key: "ready_for_review", label: "Ready for review", dot: "bg-amber-500" },
+  { key: "approved", label: "Approved", dot: "bg-indigo-500" },
+  { key: "submitted", label: "Submitted", dot: "bg-indigo-500" },
+  { key: "interview", label: "Interview", dot: "bg-violet-500" },
+  { key: "offer", label: "Offer", dot: "bg-emerald-500" },
+  { key: "rejected", label: "Rejected", dot: "bg-neutral-400 dark:bg-neutral-600" },
+  { key: "withdrawn", label: "Withdrawn", dot: "bg-neutral-400 dark:bg-neutral-600" },
 ] as const;
 
 const STAGE_LABELS: Record<string, string> = Object.fromEntries(
@@ -77,8 +77,8 @@ export default async function BoardPage({
   return (
     <main className="flex min-h-screen flex-col gap-6 px-4 py-16">
       <div className="mx-auto w-full max-w-6xl">
-        <h1 className="text-2xl font-semibold">Application board</h1>
-        <p className="text-sm text-neutral-500">
+        <h1 className="text-3xl font-semibold tracking-tight">Application board</h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Every saved application, grouped by stage.
         </p>
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
@@ -88,30 +88,41 @@ export default async function BoardPage({
         {STAGES.map((stage) => {
           const cards = byStage.get(stage.key) ?? [];
           return (
-            <div key={stage.key} className="flex w-64 shrink-0 flex-col gap-3">
-              <h2 className="text-xs font-medium uppercase text-neutral-500">
-                {stage.label} <span className="text-neutral-400">({cards.length})</span>
-              </h2>
+            <div key={stage.key} className="flex w-72 shrink-0 flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${stage.dot}`} />
+                <h2 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                  {stage.label}{" "}
+                  <span className="text-neutral-400 dark:text-neutral-600">
+                    ({cards.length})
+                  </span>
+                </h2>
+              </div>
               <div className="flex flex-col gap-3">
                 {cards.map((application) => {
                   const vacancy = application.vacancies!;
                   return (
-                    <div key={application.id} className="rounded border p-3 text-sm">
-                      <p className="font-medium">{vacancy.role_title}</p>
-                      <p className="text-xs text-neutral-500">{vacancy.employer_name}</p>
+                    <div
+                      key={application.id}
+                      className="rounded-lg border border-neutral-200 bg-white p-3 text-sm shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+                    >
+                      <p className="font-medium leading-snug">{vacancy.role_title}</p>
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                        {vacancy.employer_name}
+                      </p>
 
                       {stage.key === "saved" && vacancy.closing_date && (
-                        <p className="mt-1 text-xs text-neutral-400">
+                        <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                           Closes {vacancy.closing_date}
                         </p>
                       )}
                       {stage.key === "approved" && application.approved_at && (
-                        <p className="mt-1 text-xs text-neutral-400">
+                        <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                           Approved {new Date(application.approved_at).toLocaleDateString()}
                         </p>
                       )}
                       {stage.key === "submitted" && application.submitted_at && (
-                        <p className="mt-1 text-xs text-neutral-400">
+                        <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                           Submitted {new Date(application.submitted_at).toLocaleDateString()}
                         </p>
                       )}
@@ -119,14 +130,14 @@ export default async function BoardPage({
                       {["saved", "ready_for_review", "approved"].includes(stage.key) && (
                         <Link
                           href={`/applications#application-${application.id}`}
-                          className="mt-2 inline-block text-xs underline"
+                          className="mt-2 inline-block text-xs text-indigo-600 underline dark:text-indigo-400"
                         >
                           Manage →
                         </Link>
                       )}
 
                       {ALLOWED_STATUS_TRANSITIONS[stage.key] && (
-                        <form className="mt-2 flex flex-col gap-1">
+                        <form className="mt-3 flex items-center gap-1.5 border-t border-neutral-100 pt-2 dark:border-neutral-800">
                           <input
                             type="hidden"
                             name="application_id"
@@ -135,7 +146,7 @@ export default async function BoardPage({
                           <select
                             name="new_stage"
                             defaultValue=""
-                            className="rounded border px-2 py-1 text-xs"
+                            className="min-w-0 flex-1 rounded border border-neutral-200 px-1.5 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-900"
                           >
                             <option value="" disabled>
                               Update status…
@@ -148,9 +159,9 @@ export default async function BoardPage({
                           </select>
                           <button
                             formAction={updateApplicationStatus}
-                            className="self-start rounded border px-2 py-1 text-xs transition-transform active:scale-[0.97]"
+                            className="shrink-0 rounded bg-indigo-600 px-2 py-1 text-xs font-medium text-white transition-all hover:bg-indigo-500 active:scale-[0.97] dark:bg-indigo-500 dark:hover:bg-indigo-400"
                           >
-                            Update
+                            Go
                           </button>
                         </form>
                       )}
@@ -158,7 +169,7 @@ export default async function BoardPage({
                   );
                 })}
                 {cards.length === 0 && (
-                  <p className="text-xs text-neutral-400">—</p>
+                  <p className="text-xs text-neutral-400 dark:text-neutral-600">—</p>
                 )}
               </div>
             </div>
