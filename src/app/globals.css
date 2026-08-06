@@ -137,3 +137,28 @@ body {
     @apply font-sans;
   }
 }
+
+/* Restrained accent-colored glow for elements representing a genuinely
+   active process (currently: the AI-drafting progress bar). Always shows a
+   soft static glow; only animates it into a slow pulse when the user hasn't
+   asked for reduced motion, so "respect prefers-reduced-motion" means
+   dropping the motion, not the glow itself. */
+.glow-pulse {
+  box-shadow: 0 0 10px 0 color-mix(in oklch, var(--primary) 25%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .glow-pulse {
+    animation: glow-pulse 2.2s ease-in-out infinite;
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 10px 0 color-mix(in oklch, var(--primary) 20%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 22px 2px color-mix(in oklch, var(--primary) 45%, transparent);
+  }
+}

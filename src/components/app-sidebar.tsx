@@ -9,6 +9,7 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  Palette,
   Search,
   ShieldCheck,
   Trash2,
@@ -161,6 +162,10 @@ export function AppSidebar({
                     {isPremium ? "Manage subscription" : "Upgrade to Premium"}
                   </DropdownMenuItem>
                 </form>
+                <DropdownMenuItem render={<Link href="/account/settings" onClick={closeMobile} />}>
+                  <Palette />
+                  Settings
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   render={<Link href="/account/delete" onClick={closeMobile} />}
                   variant="destructive"

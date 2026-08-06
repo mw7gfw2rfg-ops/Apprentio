@@ -51,10 +51,10 @@ function DraftingProgress() {
   }, []);
 
   return (
-    <div className="flex w-full max-w-xs flex-col gap-2 rounded-lg border border-indigo-100 bg-indigo-50/60 px-3.5 py-3 dark:border-indigo-950 dark:bg-indigo-950/30">
-      <div className="h-1 w-full overflow-hidden rounded-full bg-indigo-100 dark:bg-indigo-950">
+    <div className="glow-pulse flex w-full max-w-xs flex-col gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3.5 py-3">
+      <div className="h-1 w-full overflow-hidden rounded-full bg-primary/15">
         <motion.div
-          className="h-full rounded-full bg-indigo-600 dark:bg-indigo-400"
+          className="h-full rounded-full bg-primary"
           initial={{ width: "4%" }}
           animate={{ width: "92%" }}
           transition={
@@ -71,7 +71,7 @@ function DraftingProgress() {
           animate={{ opacity: 1, y: 0 }}
           exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
           transition={{ duration: 0.2 }}
-          className="text-xs font-medium text-indigo-700 dark:text-indigo-300"
+          className="text-xs font-medium text-primary"
         >
           {STEPS[stepIndex]}…
         </motion.p>

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AccentStyle } from "@/components/accent-style";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 
@@ -17,7 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("onboarding_complete, subscription_tier")
+    .select("onboarding_complete, subscription_tier, accent_color")
     .eq("user_id", user.id)
     .single();
 
@@ -29,6 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <SidebarProvider>
+      <AccentStyle accentColor={profile.accent_color} />
       <AppSidebar
         email={user.email ?? ""}
         isPremium={isPremium}
