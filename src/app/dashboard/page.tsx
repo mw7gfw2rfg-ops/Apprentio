@@ -83,6 +83,14 @@ export default async function DashboardPage({
           Sign out
         </button>
       </form>
+      <Link href="/account/delete" className="text-xs text-red-600 underline">
+        Delete my account
+      </Link>
+      <p className="text-xs text-neutral-400">
+        <Link href="/privacy" className="underline">Privacy Policy</Link>
+        {" · "}
+        <Link href="/terms" className="underline">Terms of Service</Link>
+      </p>
     </main>
   );
 }

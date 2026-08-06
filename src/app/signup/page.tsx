@@ -53,6 +53,11 @@ export default async function SignupPage({
       <p className="text-sm">
         Already have an account? <Link href="/login" className="underline">Log in</Link>
       </p>
+      <p className="text-xs text-neutral-400">
+        By signing up you agree to our{" "}
+        <Link href="/terms" className="underline">Terms of Service</Link> and{" "}
+        <Link href="/privacy" className="underline">Privacy Policy</Link>.
+      </p>
     </main>
   );
 }
