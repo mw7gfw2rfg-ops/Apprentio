@@ -23,6 +23,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -56,13 +57,18 @@ export function AppSidebar({
 }) {
   const pathname = usePathname();
   const initial = email.charAt(0).toUpperCase();
+  const { setOpenMobile } = useSidebar();
+  const closeMobile = () => setOpenMobile(false);
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
+            <SidebarMenuButton
+              size="lg"
+              render={<Link href="/dashboard" onClick={closeMobile} />}
+            >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
                 A
               </div>
@@ -79,7 +85,7 @@ export function AppSidebar({
               {NAV_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
-                    render={<Link href={item.href} />}
+                    render={<Link href={item.href} onClick={closeMobile} />}
                     isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
                     tooltip={item.label}
                   >
@@ -91,7 +97,7 @@ export function AppSidebar({
               {isAdmin && (
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    render={<Link href="/admin" />}
+                    render={<Link href="/admin" onClick={closeMobile} />}
                     isActive={pathname === "/admin"}
                     tooltip="Admin"
                   >
@@ -151,7 +157,10 @@ export function AppSidebar({
                     {isPremium ? "Manage subscription" : "Upgrade to Premium"}
                   </DropdownMenuItem>
                 </form>
-                <DropdownMenuItem render={<Link href="/account/delete" />} variant="destructive">
+                <DropdownMenuItem
+                  render={<Link href="/account/delete" onClick={closeMobile} />}
+                  variant="destructive"
+                >
                   <Trash2 />
                   Delete account
                 </DropdownMenuItem>
