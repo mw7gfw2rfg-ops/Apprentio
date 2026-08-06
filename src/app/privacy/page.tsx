@@ -21,10 +21,10 @@ export default function PrivacyPolicyPage() {
       <h2 className={h2}>Who we are</h2>
       <p className={p}>
         Apprentio is a small, independently-run product for UK sixth-form students
-        applying to degree apprenticeships. [Data controller name and contact address —
-        to be added.] For anything about your data, contact{" "}
-        <a className="underline" href="mailto:privacy@apprentio.example">
-          [INSERT CONTACT EMAIL]
+        applying to degree apprenticeships, operated by Archie Richardson. For anything
+        about your data, contact{" "}
+        <a className="underline" href="mailto:richardson.archie@yahoo.com">
+          richardson.archie@yahoo.com
         </a>
         .
       </p>

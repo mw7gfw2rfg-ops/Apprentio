@@ -105,8 +105,8 @@ export default function TermsOfServicePage() {
 
       <h2 className={h2}>Contact</h2>
       <p className={p}>
-        <a className="underline" href="mailto:hello@apprentio.example">
-          [INSERT CONTACT EMAIL]
+        <a className="underline" href="mailto:richardson.archie@yahoo.com">
+          richardson.archie@yahoo.com
         </a>
       </p>
     </main>
