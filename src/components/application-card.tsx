@@ -194,7 +194,12 @@ export function ApplicationCard({
                   placeholder="e.g. tone is off, missing my NEA project"
                   className="flex-1"
                 />
-                <Button formAction={rejectApplication} variant="outline" className="text-destructive">
+                <Button
+                  type="submit"
+                  formAction={rejectApplication}
+                  variant="outline"
+                  className="text-destructive"
+                >
                   Reject
                 </Button>
               </div>
@@ -248,7 +253,7 @@ export function ApplicationCard({
             )}
             <form>
               <input type="hidden" name="application_id" value={application.id} />
-              <Button formAction={markSubmitted} variant="outline" className="self-start">
+              <Button type="submit" formAction={markSubmitted} variant="outline" className="self-start">
                 Mark as submitted
               </Button>
             </form>
