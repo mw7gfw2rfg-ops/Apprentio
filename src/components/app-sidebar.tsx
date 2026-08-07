@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { signOut } from "@/app/login/actions";
 import { createCheckoutSession, createPortalSession } from "@/app/billing/actions";
@@ -71,8 +72,8 @@ export function AppSidebar({
               size="lg"
               render={<Link href="/dashboard" onClick={closeMobile} />}
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
-                A
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Logo className="size-5" />
               </div>
               <span className="text-base font-semibold tracking-tight">Apprentio</span>
             </SidebarMenuButton>
