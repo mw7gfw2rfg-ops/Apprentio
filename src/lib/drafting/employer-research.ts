@@ -78,7 +78,12 @@ If you couldn't find genuine information, respond with:
   try {
     response = await anthropic.messages.create({
       model: "claude-sonnet-5",
-      max_tokens: 2048,
+      // Generous headroom, not tight: a real run against "Unisys Limited"
+      // used 1781 output tokens (523 of it thinking) against an earlier
+      // 2048 cap -- close enough that a slightly longer search pass
+      // truncated mid-JSON and broke parsing. Confirmed live before landing
+      // this value, not guessed.
+      max_tokens: 4096,
       tools: [{ type: "web_search_20260318", name: "web_search", max_uses: 5 }],
       messages: [{ role: "user", content: prompt }],
     });
@@ -96,7 +101,11 @@ If you couldn't find genuine information, respond with:
 
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    throw new Error("Employer research did not return structured output");
+    const reason =
+      response.stop_reason === "max_tokens"
+        ? "the response was truncated (hit max_tokens) before it finished"
+        : `no JSON object found in the response (stop_reason: ${response.stop_reason})`;
+    throw new Error(`Employer research did not return structured output -- ${reason}`);
   }
 
   let parsed: {
