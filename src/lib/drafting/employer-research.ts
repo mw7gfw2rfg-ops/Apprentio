@@ -67,6 +67,7 @@ Rules:
 - Only report information you actually found via web search in this conversation. Do not use prior knowledge, and never invent or guess at facts.
 - If "${employerName}" is too generic or ambiguous to identify a real company, or your searches turn up nothing genuinely useful, say so and report found: false rather than guessing.
 - Include at least one real source URL you retrieved, if found is true.
+- Be efficient: 2-3 targeted searches is enough. Don't cross-verify every claim across multiple sources or keep searching once you have enough for a good answer.
 
 When you are done researching, respond with ONLY a single JSON object and nothing else -- no markdown fences, no other text before or after it -- in exactly this shape:
 {"summary": "...", "values_culture": "...", "notable_facts": "...", "source": "...", "found": true}
@@ -76,17 +77,32 @@ If you couldn't find genuine information, respond with:
 
   let response;
   try {
-    response = await anthropic.messages.create({
-      model: "claude-sonnet-5",
-      // Generous headroom, not tight: a real run against "Unisys Limited"
-      // used 1781 output tokens (523 of it thinking) against an earlier
-      // 2048 cap -- close enough that a slightly longer search pass
-      // truncated mid-JSON and broke parsing. Confirmed live before landing
-      // this value, not guessed.
-      max_tokens: 4096,
-      tools: [{ type: "web_search_20260318", name: "web_search", max_uses: 5 }],
-      messages: [{ role: "user", content: prompt }],
-    });
+    response = await anthropic.messages.create(
+      {
+        model: "claude-sonnet-5",
+        // Generous headroom, not tight: a real run against "Unisys Limited"
+        // used 1781 output tokens (523 of it thinking) against an earlier
+        // 2048 cap -- close enough that a slightly longer search pass
+        // truncated mid-JSON and broke parsing.
+        max_tokens: 4096,
+        // Explicitly off: left on its adaptive default, Sonnet 5 went down
+        // an exploratory path here -- wrapping web_search in code_execution,
+        // retrying failed Python snippets, burning multiple search rounds --
+        // that once ran past Vercel's 300s function limit in production
+        // (confirmed via Vercel logs: "Task timed out after 300 seconds").
+        // This is a bounded lookup-and-summarize job, not one that benefits
+        // from open-ended reasoning.
+        thinking: { type: "disabled" },
+        tools: [{ type: "web_search_20260318", name: "web_search", max_uses: 3 }],
+        messages: [{ role: "user", content: prompt }],
+      },
+      // Hard ceiling so a slow search can never eat the whole request
+      // budget and starve the draft-generation call that runs after it --
+      // still leaves well over 100s of Vercel's 300s function limit for
+      // that call. No retries: a timeout here should surface as a clear
+      // error, not silently double the wait.
+      { timeout: 150000, maxRetries: 0 }
+    );
   } catch (err) {
     if (isWebSearchUnavailableError(err)) {
       throw new WebSearchNotEnabledError(err);
