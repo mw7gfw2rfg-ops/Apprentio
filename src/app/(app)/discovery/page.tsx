@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { geocodePostcode } from "@/lib/vacancies/geocode";
 import { haversineMiles, maxCommuteMiles } from "@/lib/vacancies/distance";
 import { sectorsToFaaRoutes } from "@/lib/vacancies/sector-mapping";
-import { Pill } from "@/components/vacancy-pill";
-import { saveVacancy } from "./actions";
+import { DiscoveryFilters } from "./DiscoveryFilters";
+import { DiscoveryBoard, type VacancyMatch } from "./DiscoveryBoard";
+import { getVacancyDetail, saveVacancy } from "./actions";
 
 type VacancyRow = {
   id: string;
@@ -21,12 +22,21 @@ type VacancyRow = {
   longitude: number | null;
 };
 
+const ANY = "any";
+
 export default async function DiscoveryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    sectors?: string;
+    level?: string;
+    commute?: string;
+    closing_within?: string;
+    starts_by?: string;
+  }>;
 }) {
-  const { error } = await searchParams;
+  const params = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,14 +58,42 @@ export default async function DiscoveryPage({
     redirect("/onboarding");
   }
 
-  const sectorsOfInterest = profile.sectors_of_interest ?? [];
-  const routes = sectorsToFaaRoutes(sectorsOfInterest);
+  // Each filter falls back to the profile's own default only when its param
+  // is entirely absent from the URL -- once the user has touched a control
+  // (including clearing it to "any"), that explicit choice always wins.
+  const activeSectors =
+    params.sectors !== undefined
+      ? params.sectors
+        ? params.sectors.split(",")
+        : []
+      : (profile.sectors_of_interest ?? []);
+
+  const activeLevel =
+    params.level === undefined
+      ? profile.minimum_apprenticeship_level
+      : params.level === ANY
+        ? null
+        : Number(params.level);
+
+  const activeCommute =
+    params.commute === undefined
+      ? profile.max_commute_minutes
+      : params.commute === ANY
+        ? null
+        : Number(params.commute);
+
+  const activeClosingWithin =
+    params.closing_within && params.closing_within !== ANY ? params.closing_within : null;
+
+  const activeStartsBy = params.starts_by || null;
+
+  const routes = sectorsToFaaRoutes(activeSectors);
   const today = new Date().toISOString().slice(0, 10);
 
-  let matches: (VacancyRow & { distanceMiles: number })[] = [];
+  let matches: VacancyMatch[] = [];
   let geocodeFailed = false;
 
-  if (routes.length > 0 && profile.postcode && profile.max_commute_minutes) {
+  if (routes.length > 0 && profile.postcode) {
     const coords = await geocodePostcode(profile.postcode);
     if (!coords) {
       geocodeFailed = true;
@@ -69,28 +107,33 @@ export default async function DiscoveryPage({
         .overlaps("sector", routes)
         .order("closing_date", { ascending: true });
 
-      if (profile.minimum_apprenticeship_level != null) {
-        vacanciesQuery = vacanciesQuery.gte(
-          "apprenticeship_level",
-          profile.minimum_apprenticeship_level
-        );
+      if (activeLevel != null) {
+        vacanciesQuery = vacanciesQuery.gte("apprenticeship_level", activeLevel);
+      }
+      if (activeClosingWithin) {
+        const cutoff = new Date(
+          new Date(today).getTime() + Number(activeClosingWithin) * 86400000
+        )
+          .toISOString()
+          .slice(0, 10);
+        vacanciesQuery = vacanciesQuery.lte("closing_date", cutoff);
+      }
+      if (activeStartsBy) {
+        vacanciesQuery = vacanciesQuery.lte("start_date", activeStartsBy);
       }
 
       const { data: vacancies } = await vacanciesQuery.returns<VacancyRow[]>();
 
-      const maxMiles = maxCommuteMiles(profile.max_commute_minutes);
-      matches = (vacancies ?? [])
+      const withDistance = (vacancies ?? [])
         .filter((v) => v.latitude != null && v.longitude != null)
         .map((v) => ({
           ...v,
-          distanceMiles: haversineMiles(
-            coords.latitude,
-            coords.longitude,
-            v.latitude!,
-            v.longitude!
-          ),
-        }))
-        .filter((v) => v.distanceMiles <= maxMiles)
+          distanceMiles: haversineMiles(coords.latitude, coords.longitude, v.latitude!, v.longitude!),
+        }));
+
+      const maxMiles = activeCommute != null ? maxCommuteMiles(activeCommute) : null;
+      matches = withDistance
+        .filter((v) => maxMiles == null || v.distanceMiles <= maxMiles)
         .sort((a, b) => a.distanceMiles - b.distanceMiles);
     }
   }
@@ -99,22 +142,22 @@ export default async function DiscoveryPage({
     .from("applications")
     .select("vacancy_id")
     .eq("user_id", user.id);
-  const savedIds = new Set((savedRows ?? []).map((r) => r.vacancy_id));
+  const savedIds = (savedRows ?? []).map((r) => r.vacancy_id);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-16">
+    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-16">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Discover apprenticeships</h1>
-        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-          Matched on sector, commute radius from <strong>{profile.postcode}</strong>, and
-          open closing dates.
+        <p className="mt-1 text-sm text-muted-foreground">
+          Matched on sector, commute radius from <strong>{profile.postcode}</strong>, and open
+          closing dates.
         </p>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {params.error && <p className="text-sm text-destructive">{params.error}</p>}
 
       {geocodeFailed && (
-        <p className="text-sm text-red-600">
+        <p className="text-sm text-destructive">
           We couldn&apos;t locate the postcode on your profile ({profile.postcode}).{" "}
           <Link href="/onboarding" className="underline">
             Update it
@@ -123,78 +166,44 @@ export default async function DiscoveryPage({
         </p>
       )}
 
-      {profile.minimum_apprenticeship_level == null && (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+      {profile.minimum_apprenticeship_level == null && activeLevel == null && (
+        <p className="text-sm text-muted-foreground">
           You haven&apos;t set a minimum apprenticeship level, so results below aren&apos;t
-          filtered by level.{" "}
-          <Link href="/onboarding" className="underline">
-            Set one
-          </Link>
-          .
+          filtered by level unless you pick one below.
         </p>
       )}
 
+      <DiscoveryFilters
+        activeSectors={activeSectors}
+        activeLevel={activeLevel}
+        activeCommute={activeCommute}
+        activeClosingWithin={activeClosingWithin}
+        activeStartsBy={activeStartsBy}
+      />
+
       {routes.length === 0 && (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          None of your sectors of interest currently map to a matchable category.
-          <Link href="/onboarding" className="ml-1 underline">
-            Adjust your sectors
+        <p className="text-sm text-muted-foreground">
+          No sectors selected currently map to a matchable category.{" "}
+          <Link href="/onboarding" className="underline">
+            Adjust your sectors of interest
           </Link>
-          .
+          , or pick some above.
         </p>
       )}
 
       {!geocodeFailed && routes.length > 0 && matches.length === 0 && (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          No vacancies currently match your profile. Check back after the next sync.
+        <p className="text-sm text-muted-foreground">
+          No vacancies currently match these filters. Try widening the commute radius or clearing
+          a filter.
         </p>
       )}
 
-      <ul className="flex flex-col gap-4">
-        {matches.map((vacancy) => {
-          const isSaved = savedIds.has(vacancy.id);
-          return (
-            <li
-              key={vacancy.id}
-              className="relative rounded-xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900"
-            >
-              <Link href={`/vacancies/${vacancy.id}`} className="block pr-24">
-                <h2 className="text-base font-semibold tracking-tight">
-                  {vacancy.role_title}
-                </h2>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                  {vacancy.employer_name}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Pill accent>{vacancy.distanceMiles.toFixed(1)} mi</Pill>
-                  <Pill>Level {vacancy.apprenticeship_level ?? "—"}</Pill>
-                  <Pill>{vacancy.location ?? vacancy.postcode ?? "—"}</Pill>
-                  <Pill>Closes {vacancy.closing_date ?? "—"}</Pill>
-                  <Pill>
-                    {vacancy.start_date
-                      ? `Starts ${vacancy.start_date}`
-                      : "Start date not specified"}
-                  </Pill>
-                </div>
-              </Link>
-              <form className="absolute right-4 top-4 shrink-0">
-                <input type="hidden" name="vacancy_id" value={vacancy.id} />
-                <button
-                  formAction={saveVacancy}
-                  disabled={isSaved}
-                  className={
-                    isSaved
-                      ? "rounded-full border border-neutral-200 px-4 py-1.5 text-sm font-medium text-neutral-400 dark:border-neutral-700 dark:text-neutral-500"
-                      : "rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-indigo-500 active:scale-[0.97] dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                  }
-                >
-                  {isSaved ? "✓ Saved" : "Save"}
-                </button>
-              </form>
-            </li>
-          );
-        })}
-      </ul>
+      <DiscoveryBoard
+        matches={matches}
+        savedIds={savedIds}
+        saveVacancy={saveVacancy}
+        getVacancyDetail={getVacancyDetail}
+      />
     </main>
   );
 }
