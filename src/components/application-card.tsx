@@ -26,6 +26,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DraftSubmitButton } from "@/app/(app)/applications/DraftSubmitButton";
+import { InterviewPrepDialog } from "@/components/interview-prep-dialog";
+import { generateInterviewPrepQuestions } from "@/app/(app)/applications/interview-prep-actions";
+import { INTERVIEW_PREP_STAGES } from "@/lib/interview-prep/constants";
+import { isGovernmentEmployer } from "@/lib/interview-prep/government";
 
 type ApplicationRow = {
   id: string;
@@ -265,6 +269,18 @@ export function ApplicationCard({
             Submitted{" "}
             {application.submitted_at && new Date(application.submitted_at).toLocaleString()}
           </p>
+        )}
+
+        {INTERVIEW_PREP_STAGES.includes(
+          application.stage as (typeof INTERVIEW_PREP_STAGES)[number]
+        ) && (
+          <InterviewPrepDialog
+            applicationId={application.id}
+            employerName={vacancy.employer_name}
+            isGovernment={isGovernmentEmployer(vacancy.employer_name)}
+            isPremium={isPremium}
+            generateAction={generateInterviewPrepQuestions}
+          />
         )}
       </CardContent>
 
