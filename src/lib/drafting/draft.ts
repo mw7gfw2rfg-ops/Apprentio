@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { extractText } from "@/lib/documents/extract-text";
 import type { createClient } from "@/lib/supabase/server";
+import { getOrResearchEmployer } from "@/lib/drafting/employer-research";
 
 const BUCKET = "base-documents";
 
@@ -35,18 +36,29 @@ export async function generateDraft({
   baseCoverLetterPath: string;
   vacancy: VacancyContext;
 }): Promise<{ tailoredCv: string; tailoredCoverLetter: string }> {
-  const [baseCv, baseCoverLetter] = await Promise.all([
+  const [baseCv, baseCoverLetter, research] = await Promise.all([
     downloadAndExtract(supabase, baseCvPath),
     downloadAndExtract(supabase, baseCoverLetterPath),
+    getOrResearchEmployer(vacancy.employer_name),
   ]);
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  const researchSection = research.found
+    ? `EMPLOYER RESEARCH (genuine, web-sourced -- you may draw on this for the cover letter)
+Summary: ${research.summary || "(none found)"}
+Values / culture: ${research.values_culture || "(none found)"}
+Notable facts: ${research.notable_facts || "(none found)"}
+Source: ${research.source || "(none)"}`
+    : `EMPLOYER RESEARCH
+No genuine information about this employer could be found via web search. Do not state anything specific about the company beyond what's in the vacancy description below.`;
 
   const prompt = `You are helping a UK sixth-form student tailor their CV and cover letter for a specific degree apprenticeship vacancy.
 
 Rules:
 - Only use information already present in their base CV and base cover letter below. Do not invent experience, qualifications, grades, or achievements.
 - You may re-order, re-emphasise, and rephrase existing content to better fit the vacancy.
+- The cover letter should reference something genuine about the employer -- drawn only from the EMPLOYER RESEARCH or VACANCY sections below -- instead of generic filler like "I admire your commitment to excellence". Do not state anything as fact about the company that isn't grounded in that research or the vacancy listing itself. If the research found nothing, don't invent a substitute -- just don't make employer-specific claims.
 - Keep the tone appropriate for a sixth-form student applying to a degree apprenticeship.
 
 VACANCY
@@ -57,6 +69,8 @@ Standard reference: ${vacancy.standard_reference ?? "unknown"}
 Location: ${vacancy.location ?? "unknown"}
 Description:
 ${vacancy.description ?? "(no description provided)"}
+
+${researchSection}
 
 BASE CV
 ${baseCv}

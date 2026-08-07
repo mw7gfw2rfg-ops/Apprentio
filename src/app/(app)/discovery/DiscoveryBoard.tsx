@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { VacancyDetailContent } from "@/components/vacancy-detail-content";
 import { useDesktopSplitPane } from "@/hooks/use-desktop-split-pane";
 import type { VacancyDetail } from "@/lib/vacancies/detail";
+import type { EmployerResearch } from "@/lib/drafting/employer-research";
 
 export type VacancyMatch = {
   id: string;
@@ -20,7 +21,11 @@ export type VacancyMatch = {
   distanceMiles: number;
 };
 
-type VacancyDetailResult = { vacancy: VacancyDetail; isSaved: boolean };
+type VacancyDetailResult = {
+  vacancy: VacancyDetail;
+  isSaved: boolean;
+  employerResearch: EmployerResearch | null;
+};
 
 export function DiscoveryBoard({
   matches,
@@ -115,6 +120,7 @@ export function DiscoveryBoard({
             <VacancyDetailContent
               vacancy={selectedResult.vacancy}
               isSaved={selectedResult.isSaved}
+              employerResearch={selectedResult.employerResearch}
               saveAction={async (formData) => {
                 await saveVacancy(formData);
                 setSelectedResult((prev) => (prev ? { ...prev, isSaved: true } : prev));

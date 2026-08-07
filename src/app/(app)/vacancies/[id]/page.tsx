@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { fetchVacancyDetail } from "@/lib/vacancies/detail";
+import { getCachedEmployerResearch } from "@/lib/drafting/employer-research";
 import { VacancyDetailContent } from "@/components/vacancy-detail-content";
 import { saveVacancy } from "../../discovery/actions";
 
@@ -43,6 +44,7 @@ export default async function VacancyDetailPage({
     .eq("vacancy_id", vacancy.id)
     .maybeSingle();
   const isSaved = !!savedRow;
+  const employerResearch = await getCachedEmployerResearch(vacancy.employer_name);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-16">
@@ -50,7 +52,12 @@ export default async function VacancyDetailPage({
         ← Back to Discover
       </Link>
 
-      <VacancyDetailContent vacancy={vacancy} isSaved={isSaved} saveAction={saveVacancy} />
+      <VacancyDetailContent
+        vacancy={vacancy}
+        isSaved={isSaved}
+        saveAction={saveVacancy}
+        employerResearch={employerResearch}
+      />
     </main>
   );
 }

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { stripHtml } from "@/lib/vacancies/format";
 import type { FaaVacancy } from "@/lib/vacancies/faa-client";
 import type { VacancyDetail } from "@/lib/vacancies/detail";
+import type { EmployerResearch } from "@/lib/drafting/employer-research";
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
@@ -29,10 +30,12 @@ export function VacancyDetailContent({
   vacancy,
   isSaved,
   saveAction,
+  employerResearch,
 }: {
   vacancy: VacancyDetail;
   isSaved: boolean;
   saveAction: (formData: FormData) => void | Promise<void>;
+  employerResearch?: EmployerResearch | null;
 }) {
   const faa = vacancy.source === "gov_api" ? (vacancy.raw_json as FaaVacancy) : null;
 
@@ -69,6 +72,42 @@ export function VacancyDetailContent({
           {vacancy.start_date ? `Starts ${vacancy.start_date}` : "Start date not specified"}
         </Badge>
       </div>
+
+      {employerResearch?.found && (
+        <div className="rounded-xl border bg-primary/5 p-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            About this employer
+          </h2>
+          <div className="mt-2 flex flex-col gap-2 text-sm leading-relaxed text-foreground/80">
+            {employerResearch.summary && <p>{employerResearch.summary}</p>}
+            {employerResearch.values_culture && (
+              <p>
+                <span className="font-medium text-foreground">Values & culture: </span>
+                {employerResearch.values_culture}
+              </p>
+            )}
+            {employerResearch.notable_facts && (
+              <p>
+                <span className="font-medium text-foreground">Notable: </span>
+                {employerResearch.notable_facts}
+              </p>
+            )}
+            {employerResearch.source && (
+              <p className="text-xs text-muted-foreground">
+                Source:{" "}
+                <a
+                  href={employerResearch.source}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  {employerResearch.source}
+                </a>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {faa && (
         <dl className="grid grid-cols-2 gap-x-4 gap-y-4 rounded-xl border p-4 sm:grid-cols-3">
