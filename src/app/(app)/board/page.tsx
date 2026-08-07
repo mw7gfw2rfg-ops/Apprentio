@@ -38,7 +38,7 @@ export default async function BoardPage({
 
   return (
     <main className="flex min-h-screen flex-col gap-6 px-4 py-16">
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="mx-auto w-full max-w-7xl">
         <h1 className="text-3xl font-semibold tracking-tight">Application board</h1>
         <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Every saved application, grouped by stage.

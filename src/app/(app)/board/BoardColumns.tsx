@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { updateApplicationStatus } from "./actions";
-import { ALLOWED_STATUS_TRANSITIONS, STAGE_LABELS, STAGES } from "./constants";
+import {
+  ALLOWED_STATUS_TRANSITIONS,
+  BOARD_COLUMNS,
+  STAGE_DOTS,
+  STAGE_LABELS,
+  STAGE_TO_COLUMN,
+} from "./constants";
 
 export type BoardApplication = {
   id: string;
@@ -20,28 +26,30 @@ export type BoardApplication = {
 
 export function BoardColumns({ applications }: { applications: BoardApplication[] }) {
   const reduceMotion = useReducedMotion();
-  const byStage = new Map<string, BoardApplication[]>();
-  for (const stage of STAGES) byStage.set(stage.key, []);
+  const byColumn = new Map<string, BoardApplication[]>();
+  for (const column of BOARD_COLUMNS) byColumn.set(column.key, []);
   for (const application of applications) {
     if (!application.vacancies) continue;
-    byStage.get(application.stage)?.push(application);
+    const columnKey = STAGE_TO_COLUMN[application.stage];
+    if (columnKey) byColumn.get(columnKey)?.push(application);
   }
 
   return (
     <LayoutGroup>
-      <div className="mx-auto flex w-full max-w-6xl gap-4 overflow-x-auto pb-4">
-        {STAGES.map((stage) => {
-          const cards = byStage.get(stage.key) ?? [];
+      <div className="mx-auto flex w-full max-w-7xl snap-x snap-mandatory gap-3 overflow-x-auto pb-4 md:grid md:grid-cols-6 md:snap-none md:gap-4 md:overflow-visible">
+        {BOARD_COLUMNS.map((column) => {
+          const cards = byColumn.get(column.key) ?? [];
+          const isMerged = column.stages.length > 1;
           return (
             <motion.div
-              key={stage.key}
+              key={column.key}
               layout
-              className="flex w-72 shrink-0 flex-col gap-3"
+              className="flex w-[78vw] max-w-[280px] shrink-0 snap-start flex-col gap-3 md:w-auto md:max-w-none md:min-w-0 md:shrink"
             >
               <div className="flex items-center gap-2">
-                <span className={`h-2 w-2 shrink-0 rounded-full ${stage.dot}`} />
+                <span className={`h-2 w-2 shrink-0 rounded-full ${column.dot}`} />
                 <h2 className="text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-                  {stage.label}{" "}
+                  {column.label}{" "}
                   <span className="text-neutral-400 dark:text-neutral-600">
                     ({cards.length})
                   </span>
@@ -51,6 +59,7 @@ export function BoardColumns({ applications }: { applications: BoardApplication[
                 <AnimatePresence initial={false}>
                   {cards.map((application) => {
                     const vacancy = application.vacancies!;
+                    const stage = application.stage;
                     return (
                       <motion.div
                         key={application.id}
@@ -67,24 +76,33 @@ export function BoardColumns({ applications }: { applications: BoardApplication[
                           {vacancy.employer_name}
                         </p>
 
-                        {stage.key === "saved" && vacancy.closing_date && (
+                        {isMerged && (
+                          <div className="mt-1.5 flex items-center gap-1.5">
+                            <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STAGE_DOTS[stage]}`} />
+                            <span className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
+                              {STAGE_LABELS[stage]}
+                            </span>
+                          </div>
+                        )}
+
+                        {stage === "saved" && vacancy.closing_date && (
                           <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                             Closes {vacancy.closing_date}
                           </p>
                         )}
-                        {stage.key === "approved" && application.approved_at && (
+                        {stage === "approved" && application.approved_at && (
                           <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                             Approved {new Date(application.approved_at).toLocaleDateString()}
                           </p>
                         )}
-                        {stage.key === "submitted" && application.submitted_at && (
+                        {stage === "submitted" && application.submitted_at && (
                           <p className="mt-1 text-xs text-neutral-400 dark:text-neutral-500">
                             Submitted{" "}
                             {new Date(application.submitted_at).toLocaleDateString()}
                           </p>
                         )}
 
-                        {["saved", "ready_for_review", "approved"].includes(stage.key) && (
+                        {["saved", "ready_for_review", "approved"].includes(stage) && (
                           <Link
                             href={`/applications#application-${application.id}`}
                             className="mt-2 inline-block text-xs text-indigo-600 hover:underline dark:text-indigo-400"
@@ -93,7 +111,7 @@ export function BoardColumns({ applications }: { applications: BoardApplication[
                           </Link>
                         )}
 
-                        {ALLOWED_STATUS_TRANSITIONS[stage.key] && (
+                        {ALLOWED_STATUS_TRANSITIONS[stage] && (
                           <form className="mt-3 flex items-center gap-1.5 border-t border-neutral-100 pt-2 dark:border-neutral-800">
                             <input
                               type="hidden"
@@ -108,7 +126,7 @@ export function BoardColumns({ applications }: { applications: BoardApplication[
                               <option value="" disabled>
                                 Update status…
                               </option>
-                              {ALLOWED_STATUS_TRANSITIONS[stage.key].map((target) => (
+                              {ALLOWED_STATUS_TRANSITIONS[stage].map((target) => (
                                 <option key={target} value={target}>
                                   {STAGE_LABELS[target]}
                                 </option>
