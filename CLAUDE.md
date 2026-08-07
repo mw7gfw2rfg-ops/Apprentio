@@ -34,6 +34,7 @@ Full plan: `PLAN.md` in this folder. Read it before making architectural decisio
 1. Read `PLAN.md` in full if this is a fresh session or the plan has changed since you last read it.
 2. Check `PLAN.md` § Roadmap for the current phase and work within its scope — don't jump ahead to later-phase features.
 3. If a decision in PLAN.md § Open Questions blocks the next step, ask Archie. Don't assume.
+4. **Read `TODO.md`.** It's the standing checklist of known bugs, security findings, UX issues, and planned features — always refer back to it. Before starting unrelated new work, check whether something on it is higher priority. When you fix or ship something that's on it, check it off (only once actually verified live, same bar as everything else here) rather than leaving it stale. When you discover a new bug or gap during other work, add it there instead of letting it live only in chat history.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
