@@ -8,7 +8,7 @@ Full detail, reproduction steps, and sources for the items below are in `OVERNIG
 
 ## Do first
 
-- [ ] **Fix the un-scrollable "Review draft" dialog on /applications.** Paying users currently can't reach the heading or Save/Approve/Reject on a normal laptop screen — the entire payoff of drafting is broken. Contained fix, likely just missing `max-h-[…] overflow-y-auto`. (UX B1)
+- [x] **Fix the un-scrollable "Review draft" dialog on /applications.** Paying users currently can't reach the heading or Save/Approve/Reject on a normal laptop screen — the entire payoff of drafting is broken. Contained fix, likely just missing `max-h-[…] overflow-y-auto`. (UX B1) — Fixed: `DialogContent` is now `flex max-h-[85vh] flex-col`, with the header and `DialogFooter` (Save edit/Approve) pinned outside a `min-h-0 flex-1 overflow-y-auto` region wrapping just the two textareas. Verified live at a real ~613–858px-tall viewport on the actual Unisys `ready_for_review` application: heading and both footer buttons visible without scrolling, mouse wheel scrolls the middle content to its true end (cover letter sign-off), and Tab/Shift+Tab + Enter reaches and activates Save edit and tabs on to Approve keyboard-only.
 - [ ] **Fix the free-draft-limit race condition.** Concurrent requests bypass the 2-draft cap — unbounded real Anthropic cost from any free account. Fix: atomic check-and-increment (RPC/`UPDATE ... WHERE free_drafts_used < $2 RETURNING`), checked before the Anthropic call. (Security #1)
 - [ ] **Add a password-reset flow.** `/forgot-password` and `/reset-password` currently just redirect to `/login` with no explanation; no link on the login form either. (UX B2)
 

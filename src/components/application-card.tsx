@@ -144,34 +144,36 @@ export function ApplicationCard({
             <div className="flex flex-wrap items-center gap-2">
               <Dialog open={editOpen} onOpenChange={setEditOpen}>
                 <DialogTrigger render={<Button />}>Review draft</DialogTrigger>
-                <DialogContent className="sm:max-w-2xl">
+                <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>{vacancy.role_title}</DialogTitle>
                     <DialogDescription>
                       Edit the tailored draft below, then save your edits or approve it as-is.
                     </DialogDescription>
                   </DialogHeader>
-                  <form action={editDraft} className="flex flex-col gap-4">
+                  <form action={editDraft} className="flex min-h-0 flex-1 flex-col gap-4">
                     <input type="hidden" name="application_id" value={application.id} />
-                    <div className="flex flex-col gap-1.5">
-                      <Label htmlFor={`cv-${application.id}`}>Tailored CV</Label>
-                      <Textarea
-                        id={`cv-${application.id}`}
-                        name="drafted_cv"
-                        defaultValue={application.drafted_cv ?? ""}
-                        rows={10}
-                        className="font-mono text-xs"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <Label htmlFor={`cover-${application.id}`}>Tailored cover letter</Label>
-                      <Textarea
-                        id={`cover-${application.id}`}
-                        name="drafted_cover_letter"
-                        defaultValue={application.drafted_cover_letter ?? ""}
-                        rows={10}
-                        className="font-mono text-xs"
-                      />
+                    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
+                      <div className="flex flex-col gap-1.5">
+                        <Label htmlFor={`cv-${application.id}`}>Tailored CV</Label>
+                        <Textarea
+                          id={`cv-${application.id}`}
+                          name="drafted_cv"
+                          defaultValue={application.drafted_cv ?? ""}
+                          rows={10}
+                          className="font-mono text-xs"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <Label htmlFor={`cover-${application.id}`}>Tailored cover letter</Label>
+                        <Textarea
+                          id={`cover-${application.id}`}
+                          name="drafted_cover_letter"
+                          defaultValue={application.drafted_cover_letter ?? ""}
+                          rows={10}
+                          className="font-mono text-xs"
+                        />
+                      </div>
                     </div>
                     <DialogFooter>
                       <Button type="submit" formAction={editDraft} variant="outline">
