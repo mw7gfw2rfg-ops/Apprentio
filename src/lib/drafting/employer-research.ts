@@ -1,5 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
 const FRESHNESS_DAYS = 30;
 
@@ -168,7 +172,15 @@ export async function getCachedEmployerResearch(
 // FRESHNESS_DAYS old), otherwise researches for real via web search and
 // caches the result, keyed by employer so every other vacancy at the same
 // employer reuses this row instead of re-researching.
-export async function getOrResearchEmployer(employerName: string): Promise<EmployerResearch> {
+//
+// Takes the caller's user-scoped Supabase client (not the admin client used
+// for the actual reads/writes below) purely so the rate-limit check has real
+// auth.uid() context -- claim_ai_rate_limit is SECURITY DEFINER and scopes
+// itself to the calling user, which only works over a real user session.
+export async function getOrResearchEmployer(
+  employerName: string,
+  supabase: SupabaseClient
+): Promise<EmployerResearch> {
   const admin = createAdminClient();
   const employerKey = normalizeEmployerKey(employerName);
 
@@ -183,6 +195,13 @@ export async function getOrResearchEmployer(employerName: string): Promise<Emplo
     if (ageDays < FRESHNESS_DAYS) {
       return cached;
     }
+  }
+
+  // Only gated here, on the path that actually calls the Anthropic API --
+  // a cache hit above never touches the rate limit.
+  const rateLimit = await checkRateLimit(supabase, "employer_research");
+  if (!rateLimit.allowed) {
+    throw new Error(rateLimit.error);
   }
 
   const result = await researchViaWebSearch(employerName);

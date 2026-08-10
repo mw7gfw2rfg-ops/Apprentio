@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { generateDraft } from "@/lib/drafting/draft";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const FREE_DRAFT_LIMIT = 2;
 
@@ -65,6 +66,16 @@ export async function draftApplication(formData: FormData) {
 
   if (!application || !application.vacancies) {
     redirect("/applications?error=Application not found");
+  }
+
+  // Defense-in-depth against a scripted/compromised-account loop, independent
+  // of the tier check above — applies to premium too, since "unlimited"
+  // is about the tier gate, not about having zero technical ceiling on real
+  // Anthropic spend (OVERNIGHT_SECURITY_REVIEW.md #2). Checked before the
+  // free-draft claim so a rate-limited request doesn't burn a free slot.
+  const draftRateLimit = await checkRateLimit(supabase, "draft");
+  if (!draftRateLimit.allowed) {
+    redirect(`/applications?error=${encodeURIComponent(draftRateLimit.error)}`);
   }
 
   // Atomic check-and-increment, claimed *before* the Anthropic call — a

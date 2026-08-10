@@ -39,7 +39,7 @@ export async function generateDraft({
   const [baseCv, baseCoverLetter, research] = await Promise.all([
     downloadAndExtract(supabase, baseCvPath),
     downloadAndExtract(supabase, baseCoverLetterPath),
-    getOrResearchEmployer(vacancy.employer_name),
+    getOrResearchEmployer(vacancy.employer_name, supabase),
   ]);
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });

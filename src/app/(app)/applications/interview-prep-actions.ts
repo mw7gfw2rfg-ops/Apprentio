@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCachedEmployerResearch } from "@/lib/drafting/employer-research";
 import { generateInterviewQuestions, type GeneratedInterviewPrep } from "@/lib/interview-prep/generate";
 import { INTERVIEW_PREP_STAGES } from "@/lib/interview-prep/constants";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 type Result = { ok: true; data: GeneratedInterviewPrep } | { ok: false; error: string };
 
@@ -62,6 +63,14 @@ export async function generateInterviewPrepQuestions(
 
   if (!INTERVIEW_PREP_STAGES.includes(application.stage as (typeof INTERVIEW_PREP_STAGES)[number])) {
     return { ok: false, error: "Interview prep is available once an application has been submitted." };
+  }
+
+  // Defense-in-depth, independent of the premium check above — covers a
+  // scripted or repeated "Regenerate" loop, which re-invokes this same
+  // action (OVERNIGHT_SECURITY_REVIEW.md #2).
+  const rateLimit = await checkRateLimit(supabase, "interview_prep");
+  if (!rateLimit.allowed) {
+    return { ok: false, error: rateLimit.error };
   }
 
   const vacancy = application.vacancies;
