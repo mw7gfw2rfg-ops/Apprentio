@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { generateDraft } from "@/lib/drafting/draft";
 
 const FREE_DRAFT_LIMIT = 2;
@@ -24,13 +23,11 @@ export async function draftApplication(formData: FormData) {
   }
 
   // Mandatory server-side gate — the UI hides the real Draft button once a
-  // free-tier user is out of drafts, but that's UX only. This check is what
-  // actually stops the Anthropic API from being called beyond the cap.
+  // free-tier user is out of drafts, but that's UX only. The actual cap is
+  // enforced below via an atomic claim, not this read.
   const { data: profile } = await supabase
     .from("profiles")
-    .select(
-      "subscription_tier, free_drafts_used, base_cv_storage_path, base_cover_letter_storage_path"
-    )
+    .select("subscription_tier, base_cv_storage_path, base_cover_letter_storage_path")
     .eq("user_id", user.id)
     .single();
 
@@ -39,14 +36,6 @@ export async function draftApplication(formData: FormData) {
   }
 
   const isPremium = profile.subscription_tier === "premium";
-  if (!isPremium && profile.free_drafts_used >= FREE_DRAFT_LIMIT) {
-    redirect(
-      "/applications?error=" +
-        encodeURIComponent(
-          `You've used your ${FREE_DRAFT_LIMIT} free drafts — upgrade to premium for unlimited drafts`
-        )
-    );
-  }
 
   if (!profile.base_cv_storage_path || !profile.base_cover_letter_storage_path) {
     redirect(
@@ -78,6 +67,31 @@ export async function draftApplication(formData: FormData) {
     redirect("/applications?error=Application not found");
   }
 
+  // Atomic check-and-increment, claimed *before* the Anthropic call — a
+  // single `UPDATE ... WHERE free_drafts_used < $limit RETURNING` (see
+  // claim_free_draft in the migrations), not a read-then-write. Concurrent
+  // requests serialise on the same row: only as many as remain under the
+  // cap can ever claim a slot, so this is what actually stops unbounded
+  // real Anthropic cost, not the redirect-on-read this replaced.
+  let claimed = false;
+  if (!isPremium) {
+    const { data: newCount, error: claimError } = await supabase.rpc("claim_free_draft", {
+      p_limit: FREE_DRAFT_LIMIT,
+    });
+    if (claimError) {
+      redirect(`/applications?error=${encodeURIComponent(claimError.message)}`);
+    }
+    if (newCount === null) {
+      redirect(
+        "/applications?error=" +
+          encodeURIComponent(
+            `You've used your ${FREE_DRAFT_LIMIT} free drafts — upgrade to premium for unlimited drafts`
+          )
+      );
+    }
+    claimed = true;
+  }
+
   try {
     const { tailoredCv, tailoredCoverLetter } = await generateDraft({
       supabase,
@@ -99,20 +113,13 @@ export async function draftApplication(formData: FormData) {
     if (error) {
       throw new Error(error.message);
     }
-
-    // free_drafts_used isn't writable by the authenticated role (see the
-    // column-lockdown migration) — this admin-client write is safe because
-    // the draft actually succeeded and every check above already confirmed
-    // this is the real, authenticated owner of the application.
-    const admin = createAdminClient();
-    const { error: countError } = await admin
-      .from("profiles")
-      .update({ free_drafts_used: profile.free_drafts_used + 1 })
-      .eq("user_id", user.id);
-    if (countError) {
-      throw new Error(countError.message);
-    }
   } catch (err) {
+    // Roll back the claimed slot — also a single atomic statement (see
+    // release_free_draft), not read-then-write — so a failed draft doesn't
+    // permanently cost the student one of their free attempts.
+    if (claimed) {
+      await supabase.rpc("release_free_draft");
+    }
     redirect(
       `/applications?error=${encodeURIComponent(err instanceof Error ? err.message : "Draft failed")}`
     );
