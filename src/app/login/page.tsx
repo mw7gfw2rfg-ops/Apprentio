@@ -5,9 +5,9 @@ import { login } from "./actions";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; passwordReset?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, passwordReset } = await searchParams;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-4 py-16">
@@ -25,6 +25,12 @@ export default async function LoginPage({
             Log in to keep tracking your applications.
           </p>
         </div>
+
+        {passwordReset && (
+          <p className="rounded-lg border border-green-200 bg-green-50 px-3.5 py-2.5 text-sm text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
+            Password updated — log in with your new password.
+          </p>
+        )}
 
         {error && (
           <p className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
@@ -46,9 +52,17 @@ export default async function LoginPage({
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
-            <span className="font-medium text-neutral-700 dark:text-neutral-300">
-              Password
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-neutral-700 dark:text-neutral-300">
+                Password
+              </span>
+              <Link
+                href="/forgot-password"
+                className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <input
               name="password"
               type="password"
