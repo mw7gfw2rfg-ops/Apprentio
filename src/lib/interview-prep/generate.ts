@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { EmployerResearch } from "@/lib/drafting/employer-research";
+import { UNTRUSTED_DATA_INSTRUCTION, untrustedBlock } from "@/lib/prompt-safety";
 
 type VacancyContext = {
   employer_name: string;
@@ -38,18 +39,37 @@ export async function generateInterviewQuestions({
   const researchSection =
     employerResearch?.found
       ? `EMPLOYER RESEARCH (genuine, web-sourced)
-Summary: ${employerResearch.summary || "(none found)"}
+${untrustedBlock(
+  "employer_research",
+  `Summary: ${employerResearch.summary || "(none found)"}
 Values / culture: ${employerResearch.values_culture || "(none found)"}
 Notable facts: ${employerResearch.notable_facts || "(none found)"}`
+)}`
       : "EMPLOYER RESEARCH\nNo genuine research is available for this employer.";
 
+  // Not wrapped as untrusted_data: employer_sources.notes is admin-curated
+  // (only written via the /admin route), not attacker-reachable the way the
+  // vacancy listing or web-search-derived research is.
   const sourceNotesSection = employerSourceNotes
     ? `EMPLOYER SOURCE NOTES (internally verified facts about this employer, e.g. application process details)\n${employerSourceNotes}`
     : "EMPLOYER SOURCE NOTES\nNone available.";
 
+  const vacancyListing = untrustedBlock(
+    "vacancy_listing",
+    `Employer: ${vacancy.employer_name}
+Role: ${vacancy.role_title}
+Apprenticeship level: ${vacancy.apprenticeship_level ?? "unknown"}
+Standard reference: ${vacancy.standard_reference ?? "unknown"}
+Location: ${vacancy.location ?? "unknown"}
+Description:
+${vacancy.description ?? "(no description provided)"}`
+  );
+
   const prompt = `You are helping a UK sixth-form student prepare for a degree apprenticeship ${format === "video_interview" ? "video interview" : "panel interview"} at a specific employer.
 
 ${FORMAT_FRAMING[format]}
+
+${UNTRUSTED_DATA_INSTRUCTION}
 
 Generate 5-6 realistic interview questions for this specific vacancy, each with a one-line note on what the interviewer is actually assessing with that question. Then generate 3-4 short talking points the student could use to connect their own background to this specific role -- things worth mentioning, not full scripted answers.
 
@@ -59,13 +79,7 @@ Rules:
 - Talking points must reference only genuinely plausible sixth-form-level experience (A-levels, school projects, personal projects, part-time work, extracurriculars) in general terms -- you don't have this specific student's CV, so keep points about what KIND of experience would be worth raising, not invented specifics.
 
 VACANCY
-Employer: ${vacancy.employer_name}
-Role: ${vacancy.role_title}
-Apprenticeship level: ${vacancy.apprenticeship_level ?? "unknown"}
-Standard reference: ${vacancy.standard_reference ?? "unknown"}
-Location: ${vacancy.location ?? "unknown"}
-Description:
-${vacancy.description ?? "(no description provided)"}
+${vacancyListing}
 
 ${researchSection}
 
