@@ -41,8 +41,12 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isApiRoute = request.nextUrl.pathname.startsWith("/api/");
+  // "/" itself is public (the signed-out landing page) but is checked with an
+  // exact match, not startsWith like the rest of PUBLIC_PATHS -- every path
+  // starts with "/", so a prefix match here would make the whole app public.
   const isPublicPath =
     isApiRoute ||
+    request.nextUrl.pathname === "/" ||
     PUBLIC_PATHS.some((path) => request.nextUrl.pathname.startsWith(path));
 
   if (!user && !isPublicPath) {
