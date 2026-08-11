@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site-url";
+import { friendlyAuthErrorMessage } from "@/lib/auth-errors";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -13,7 +14,7 @@ export async function login(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    redirect(`/login?error=${encodeURIComponent(friendlyAuthErrorMessage(error))}`);
   }
 
   redirect("/dashboard");
@@ -31,7 +32,7 @@ export async function signup(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/signup?error=${encodeURIComponent(error.message)}`);
+    redirect(`/signup?error=${encodeURIComponent(friendlyAuthErrorMessage(error))}`);
   }
 
   redirect("/signup?checkEmail=1");
@@ -59,7 +60,7 @@ export async function requestPasswordReset(formData: FormData) {
   // account-enumeration by design) -- an error here means something else
   // went wrong (rate limit, etc.), not "no such account".
   if (error) {
-    redirect(`/forgot-password?error=${encodeURIComponent(error.message)}`);
+    redirect(`/forgot-password?error=${encodeURIComponent(friendlyAuthErrorMessage(error))}`);
   }
 
   redirect("/forgot-password?checkEmail=1");
@@ -78,7 +79,7 @@ export async function resetPassword(formData: FormData) {
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
-    redirect(`/reset-password?error=${encodeURIComponent(error.message)}`);
+    redirect(`/reset-password?error=${encodeURIComponent(friendlyAuthErrorMessage(error))}`);
   }
 
   await supabase.auth.signOut();
