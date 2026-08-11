@@ -230,7 +230,17 @@ function Sidebar({
         data-slot="sidebar-container"
         data-side={side}
         className={cn(
-          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex",
+          // sticky, not fixed: position:fixed takes this out of normal flow,
+          // and Chromium's sequential-focus-navigation entry point (both
+          // Tab-from-nothing and Shift+Tab arriving from the header) treats
+          // out-of-flow elements as ordered after in-flow content regardless
+          // of DOM position -- confirmed live (UX M3) by toggling this one
+          // property: with fixed, Tab from a blank focus state skips straight
+          // past every sidebar control to the header's SidebarTrigger; with
+          // sticky it correctly lands on the first sidebar link in both
+          // directions. h-svh + top-0 reproduces the same "always pinned to
+          // the viewport" visual result without leaving normal flow.
+          "sticky top-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear data-[side=left]:left-0 data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] data-[side=right]:right-0 data-[side=right]:group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] md:flex",
           // Adjust the padding for floating and inset variants.
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
