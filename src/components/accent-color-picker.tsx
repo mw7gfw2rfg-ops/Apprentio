@@ -97,7 +97,7 @@ function PreviewSwatch({
         className="flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium"
         style={{ backgroundColor: tokens.primary, color: tokens.foreground }}
       >
-        Save
+        Preview
       </span>
     </div>
   );
