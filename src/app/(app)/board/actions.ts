@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ALLOWED_STATUS_TRANSITIONS } from "./constants";
+import { logApplicationEvent } from "@/lib/application-events";
 
 export async function updateApplicationStatus(formData: FormData) {
   const supabase = await createClient();
@@ -50,6 +51,11 @@ export async function updateApplicationStatus(formData: FormData) {
   if (error) {
     redirect(`/board?error=${encodeURIComponent(error.message)}`);
   }
+
+  await logApplicationEvent(supabase, applicationId, "status_changed", {
+    from_stage: currentStage,
+    to_stage: newStage,
+  });
 
   revalidatePath("/board");
 }

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { generateDraft } from "@/lib/drafting/draft";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { logApplicationEvent } from "@/lib/application-events";
 
 const FREE_DRAFT_LIMIT = 2;
 
@@ -124,6 +125,10 @@ export async function draftApplication(formData: FormData) {
     if (error) {
       throw new Error(error.message);
     }
+
+    await logApplicationEvent(supabase, applicationId, "draft_generated", {
+      to_stage: "ready_for_review",
+    });
   } catch (err) {
     // Roll back the claimed slot — also a single atomic statement (see
     // release_free_draft), not read-then-write — so a failed draft doesn't
@@ -175,6 +180,8 @@ export async function editDraft(formData: FormData) {
     redirect(`/applications?error=${encodeURIComponent(error.message)}`);
   }
 
+  await logApplicationEvent(supabase, applicationId, "draft_edited");
+
   revalidatePath("/applications");
 }
 
@@ -210,6 +217,11 @@ export async function approveApplication(formData: FormData) {
   if (error) {
     redirect(`/applications?error=${encodeURIComponent(error.message)}`);
   }
+
+  await logApplicationEvent(supabase, applicationId, "draft_approved", {
+    from_stage: "ready_for_review",
+    to_stage: "approved",
+  });
 
   revalidatePath("/applications");
 }
@@ -250,6 +262,12 @@ export async function rejectApplication(formData: FormData) {
     redirect(`/applications?error=${encodeURIComponent(error.message)}`);
   }
 
+  await logApplicationEvent(supabase, applicationId, "draft_rejected", {
+    from_stage: "ready_for_review",
+    to_stage: "saved",
+    reason,
+  });
+
   revalidatePath("/applications");
 }
 
@@ -276,6 +294,11 @@ export async function markSubmitted(formData: FormData) {
   if (error) {
     redirect(`/applications?error=${encodeURIComponent(error.message)}`);
   }
+
+  await logApplicationEvent(supabase, applicationId, "status_changed", {
+    from_stage: "approved",
+    to_stage: "submitted",
+  });
 
   revalidatePath("/applications");
 }
