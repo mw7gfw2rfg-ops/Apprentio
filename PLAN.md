@@ -131,7 +131,7 @@ RLS: every table except `vacancies` and `employer_sources` (shared reference dat
 **Free tier — "basics"**
 - Full vacancy discovery/matching against the student's profile.
 - Save vacancies, manual application tracking through every stage, deadline reminders.
-- No AI-drafted CV/cover letter — student manages their own documents outside the app (or pastes their own text into notes).
+- 2 free AI-drafted CVs/cover letters as a taster (server-side counted via `profiles.free_drafts_used`, atomically checked so concurrent requests can't bypass the cap — see `TODO.md` Security #1); after that, drafting requires premium. Student manages their own documents outside the app for anything beyond the 2 free drafts.
 
 **Premium tier — "full automation"**
 - Everything in free, plus: AI-drafted, per-vacancy tailored CV and cover letter (§ Core workflows → Drafting), still gated behind the same mandatory approval step as everything else.
