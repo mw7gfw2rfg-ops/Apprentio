@@ -105,7 +105,7 @@ export function BoardColumns({ applications }: { applications: BoardApplication[
                         {["saved", "ready_for_review", "approved"].includes(stage) && (
                           <Link
                             href={`/applications#application-${application.id}`}
-                            className="mt-2 inline-block text-xs text-indigo-600 hover:underline dark:text-indigo-400"
+                            className="mt-2 inline-block text-xs text-primary hover:underline"
                           >
                             Manage →
                           </Link>
@@ -134,7 +134,7 @@ export function BoardColumns({ applications }: { applications: BoardApplication[
                             </select>
                             <button
                               formAction={updateApplicationStatus}
-                              className="shrink-0 rounded bg-indigo-600 px-2 py-1 text-xs font-medium text-white transition-all hover:bg-indigo-500 active:scale-[0.97] dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                              className="shrink-0 rounded bg-primary px-2 py-1 text-xs font-medium text-primary-foreground transition-all hover:bg-primary/80 active:scale-[0.97]"
                             >
                               Go
                             </button>
