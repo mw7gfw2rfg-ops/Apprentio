@@ -162,3 +162,27 @@ body {
     box-shadow: 0 0 22px 2px color-mix(in oklch, var(--primary) 45%, transparent);
   }
 }
+
+/* Indeterminate top-of-content progress bar shown while a route segment is
+   loading (see (app)/loading.tsx) -- we don't know how long the navigation
+   will take, so this loops rather than completing. Reduced motion still
+   shows a static bar (the loading affordance itself stays), it just drops
+   the sliding motion. */
+.loading-bar-track {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .loading-bar-fill {
+    animation: loading-bar-slide 1.1s ease-in-out infinite;
+  }
+}
+
+@keyframes loading-bar-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
