@@ -44,7 +44,7 @@ export function BoardColumns({ applications }: { applications: BoardApplication[
             <motion.div
               key={column.key}
               layout
-              className="flex w-[78vw] max-w-[280px] shrink-0 snap-start flex-col gap-3 md:w-auto md:max-w-none md:min-w-0 md:shrink"
+              className="flex w-[72vw] max-w-[260px] shrink-0 snap-start flex-col gap-3 md:w-auto md:max-w-none md:min-w-0 md:shrink"
             >
               <div className="flex items-center gap-2">
                 <span className={`h-2 w-2 shrink-0 rounded-full ${column.dot}`} />

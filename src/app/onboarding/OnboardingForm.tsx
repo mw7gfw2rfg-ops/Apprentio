@@ -95,8 +95,8 @@ export default function OnboardingForm({
         </p>
       )}
 
-      <fieldset className="flex flex-wrap gap-4">
-        <label className="flex flex-1 min-w-[10rem] flex-col gap-1.5 text-sm">
+      <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label className="flex flex-col gap-1.5 text-sm">
           <span className={fieldLabelClass}>Full name</span>
           <input
             name="full_name"
@@ -106,7 +106,7 @@ export default function OnboardingForm({
             placeholder="e.g. Archie Richardson"
           />
         </label>
-        <label className="flex flex-1 min-w-[10rem] flex-col gap-1.5 text-sm">
+        <label className="flex flex-col gap-1.5 text-sm">
           <span className={fieldLabelClass}>School year</span>
           <input
             name="school_year"
@@ -129,7 +129,7 @@ export default function OnboardingForm({
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={reduceMotion ? undefined : { opacity: 0, height: 0, y: -4 }}
               transition={{ type: "spring", bounce: 0, duration: 0.35 }}
-              className="flex flex-wrap items-end gap-2"
+              className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end"
             >
               <label className="flex flex-col gap-1 text-xs">
                 <span className="text-neutral-500 dark:text-neutral-400">Subject</span>
@@ -180,7 +180,7 @@ export default function OnboardingForm({
                 type="button"
                 onClick={() => removeSubject(index)}
                 disabled={subjects.length === 1}
-                className={`${ghostButtonClass} disabled:pointer-events-none disabled:opacity-40`}
+                className={`${ghostButtonClass} justify-self-start disabled:pointer-events-none disabled:opacity-40`}
                 aria-label={`Remove subject ${row.subject || index + 1}`}
               >
                 Remove
@@ -211,7 +211,7 @@ export default function OnboardingForm({
         </div>
       </fieldset>
 
-      <fieldset className="flex flex-wrap gap-4">
+      <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5 text-sm">
           <span className={fieldLabelClass}>Postcode</span>
           <input
