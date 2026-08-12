@@ -40,13 +40,14 @@ export async function generateInterviewPrepQuestions(
   const { data: application } = await supabase
     .from("applications")
     .select(
-      "id, stage, vacancies(employer_name, role_title, description, apprenticeship_level, standard_reference, location)"
+      "id, stage, vacancy_id, vacancies(employer_name, role_title, description, apprenticeship_level, standard_reference, location)"
     )
     .eq("id", applicationId)
     .eq("user_id", user.id)
     .single<{
       id: string;
       stage: string;
+      vacancy_id: string | null;
       vacancies: {
         employer_name: string;
         role_title: string;
@@ -57,8 +58,16 @@ export async function generateInterviewPrepQuestions(
       } | null;
     }>();
 
-  if (!application || !application.vacancies) {
+  if (!application) {
     return { ok: false, error: "Application not found." };
+  }
+
+  if (!application.vacancy_id || !application.vacancies) {
+    return {
+      ok: false,
+      error:
+        "AI-generated interview questions aren't available for manually-added applications — Apprentio doesn't have the listing details it needs to tailor them.",
+    };
   }
 
   if (!INTERVIEW_PREP_STAGES.includes(application.stage as (typeof INTERVIEW_PREP_STAGES)[number])) {

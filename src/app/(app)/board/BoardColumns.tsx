@@ -16,6 +16,11 @@ export type BoardApplication = {
   stage: string;
   approved_at: string | null;
   submitted_at: string | null;
+  vacancy_id: string | null;
+  manual_employer_name: string | null;
+  manual_role_title: string | null;
+  manual_apply_url: string | null;
+  manual_closing_date: string | null;
   vacancies: {
     employer_name: string;
     role_title: string;
@@ -29,7 +34,6 @@ export function BoardColumns({ applications }: { applications: BoardApplication[
   const byColumn = new Map<string, BoardApplication[]>();
   for (const column of BOARD_COLUMNS) byColumn.set(column.key, []);
   for (const application of applications) {
-    if (!application.vacancies) continue;
     const columnKey = STAGE_TO_COLUMN[application.stage];
     if (columnKey) byColumn.get(columnKey)?.push(application);
   }
@@ -58,7 +62,19 @@ export function BoardColumns({ applications }: { applications: BoardApplication[
               <div className="flex flex-col gap-3">
                 <AnimatePresence initial={false}>
                   {cards.map((application) => {
-                    const vacancy = application.vacancies!;
+                    const vacancy = {
+                      role_title:
+                        application.vacancies?.role_title ??
+                        application.manual_role_title ??
+                        "Untitled role",
+                      employer_name:
+                        application.vacancies?.employer_name ??
+                        application.manual_employer_name ??
+                        "Unknown employer",
+                      closing_date:
+                        application.vacancies?.closing_date ??
+                        application.manual_closing_date,
+                    };
                     const stage = application.stage;
                     return (
                       <motion.div

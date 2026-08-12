@@ -30,7 +30,7 @@ export default async function BoardPage({
   const { data: applications } = await supabase
     .from("applications")
     .select(
-      "id, stage, approved_at, submitted_at, vacancies(employer_name, role_title, closing_date, apply_url)"
+      "id, stage, approved_at, submitted_at, vacancy_id, manual_employer_name, manual_role_title, manual_apply_url, manual_closing_date, vacancies(employer_name, role_title, closing_date, apply_url)"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })

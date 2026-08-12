@@ -39,6 +39,11 @@ type ApplicationRow = {
   draft_notes: string | null;
   approved_at: string | null;
   submitted_at: string | null;
+  vacancy_id: string | null;
+  manual_employer_name: string | null;
+  manual_role_title: string | null;
+  manual_apply_url: string | null;
+  manual_closing_date: string | null;
   vacancies: {
     employer_name: string;
     role_title: string;
@@ -66,6 +71,7 @@ export function ApplicationCard({
   approveApplication,
   rejectApplication,
   markSubmitted,
+  markManualSubmitted,
 }: {
   application: ApplicationRow;
   canDraft: boolean;
@@ -77,11 +83,19 @@ export function ApplicationCard({
   approveApplication: (formData: FormData) => void;
   rejectApplication: (formData: FormData) => void;
   markSubmitted: (formData: FormData) => void;
+  markManualSubmitted: (formData: FormData) => void;
 }) {
   const [editOpen, setEditOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
-  const vacancy = application.vacancies;
-  if (!vacancy) return null;
+  const isManual = !application.vacancies;
+  const vacancy = {
+    role_title:
+      application.vacancies?.role_title ?? application.manual_role_title ?? "Untitled role",
+    employer_name:
+      application.vacancies?.employer_name ?? application.manual_employer_name ?? "Unknown employer",
+    apply_url: application.vacancies?.apply_url ?? application.manual_apply_url,
+    closing_date: application.vacancies?.closing_date ?? application.manual_closing_date,
+  };
 
   return (
     <Card id={`application-${application.id}`} className="scroll-mt-4">
@@ -103,7 +117,22 @@ export function ApplicationCard({
                 Last draft rejected: {application.draft_notes}
               </p>
             )}
-            {!canDraft && (
+            {isManual && (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  AI drafting isn&apos;t available for manually-added applications —
+                  Apprentio doesn&apos;t have the listing details it needs to tailor a
+                  draft. You can still track this application through every stage below.
+                </p>
+                <form className="self-start">
+                  <input type="hidden" name="application_id" value={application.id} />
+                  <Button type="submit" formAction={markManualSubmitted} variant="outline">
+                    Mark as submitted
+                  </Button>
+                </form>
+              </>
+            )}
+            {!isManual && !canDraft && (
               <Button
                 type="button"
                 disabled
@@ -114,12 +143,12 @@ export function ApplicationCard({
                 Upgrade to draft a tailored CV & cover letter
               </Button>
             )}
-            {canDraft && !hasBaseDocuments && (
+            {!isManual && canDraft && !hasBaseDocuments && (
               <p className="text-destructive">
                 Upload your base CV and cover letter in your profile before drafting.
               </p>
             )}
-            {canDraft && hasBaseDocuments && (
+            {!isManual && canDraft && hasBaseDocuments && (
               <div className="flex flex-col gap-1">
                 <form action={draftApplication}>
                   <input type="hidden" name="application_id" value={application.id} />
@@ -281,6 +310,7 @@ export function ApplicationCard({
             employerName={vacancy.employer_name}
             isGovernment={isGovernmentEmployer(vacancy.employer_name)}
             isPremium={isPremium}
+            isManual={isManual}
             generateAction={generateInterviewPrepQuestions}
           />
         )}
@@ -295,7 +325,7 @@ export function ApplicationCard({
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:underline"
             >
-              View on Find an Apprenticeship
+              {isManual ? "View listing" : "View on Find an Apprenticeship"}
               <ArrowUpRight className="size-3.5" />
             </a>
           </CardFooter>

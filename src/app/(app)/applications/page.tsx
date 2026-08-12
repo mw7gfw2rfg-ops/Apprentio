@@ -2,10 +2,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ApplicationCard } from "@/components/application-card";
 import { Badge } from "@/components/ui/badge";
+import { AddManualApplicationDialog } from "./AddManualApplicationDialog";
 import {
+  addManualApplication,
   approveApplication,
   draftApplication,
   editDraft,
+  markManualSubmitted,
   markSubmitted,
   rejectApplication,
 } from "./actions";
@@ -20,6 +23,11 @@ type ApplicationRow = {
   draft_notes: string | null;
   approved_at: string | null;
   submitted_at: string | null;
+  vacancy_id: string | null;
+  manual_employer_name: string | null;
+  manual_role_title: string | null;
+  manual_apply_url: string | null;
+  manual_closing_date: string | null;
   vacancies: {
     employer_name: string;
     role_title: string;
@@ -65,7 +73,7 @@ export default async function ApplicationsPage({
   const { data: applications } = await supabase
     .from("applications")
     .select(
-      "id, stage, drafted_cv, drafted_cover_letter, draft_notes, approved_at, submitted_at, vacancies(employer_name, role_title, apply_url, closing_date)"
+      "id, stage, drafted_cv, drafted_cover_letter, draft_notes, approved_at, submitted_at, vacancy_id, manual_employer_name, manual_role_title, manual_apply_url, manual_closing_date, vacancies(employer_name, role_title, apply_url, closing_date)"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -73,15 +81,18 @@ export default async function ApplicationsPage({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-10">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">My applications</h1>
-        <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-          <Badge variant={isPremium ? "default" : "secondary"}>
-            {isPremium ? "Premium" : "Free"}
-          </Badge>
-          {!isPremium &&
-            `${freeDraftsRemaining} free draft${freeDraftsRemaining === 1 ? "" : "s"} left`}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">My applications</h1>
+          <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+            <Badge variant={isPremium ? "default" : "secondary"}>
+              {isPremium ? "Premium" : "Free"}
+            </Badge>
+            {!isPremium &&
+              `${freeDraftsRemaining} free draft${freeDraftsRemaining === 1 ? "" : "s"} left`}
+          </p>
+        </div>
+        <AddManualApplicationDialog addManualApplication={addManualApplication} />
       </div>
 
       {error && (
@@ -110,6 +121,7 @@ export default async function ApplicationsPage({
             approveApplication={approveApplication}
             rejectApplication={rejectApplication}
             markSubmitted={markSubmitted}
+            markManualSubmitted={markManualSubmitted}
           />
         ))}
       </div>

@@ -47,12 +47,14 @@ export function InterviewPrepDialog({
   employerName,
   isGovernment,
   isPremium,
+  isManual,
   generateAction,
 }: {
   applicationId: string;
   employerName: string;
   isGovernment: boolean;
   isPremium: boolean;
+  isManual: boolean;
   generateAction: (
     applicationId: string,
     format: "video_interview" | "panel_interview"
@@ -127,7 +129,15 @@ export function InterviewPrepDialog({
                 AI-generated practice questions for this role
               </h3>
 
-              {!isPremium && (
+              {isManual && (
+                <p className="text-sm text-muted-foreground">
+                  AI-generated questions aren&apos;t available for manually-added
+                  applications — Apprentio doesn&apos;t have the listing details it
+                  needs to tailor them. The format explainers above still apply.
+                </p>
+              )}
+
+              {!isManual && !isPremium && (
                 <Button
                   type="button"
                   disabled
@@ -139,7 +149,7 @@ export function InterviewPrepDialog({
                 </Button>
               )}
 
-              {isPremium && !aiResult && (
+              {!isManual && isPremium && !aiResult && (
                 <Button
                   type="button"
                   onClick={handleGenerate}

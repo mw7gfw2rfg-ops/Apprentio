@@ -99,8 +99,11 @@ employer_sources  -- curated reference data, admin-maintained
   employer_name, portal_url, portal_type enum(direct|ucas|findapprenticeship),
   verified_level, notes, last_verified_at
 
-applications  -- one per (user, vacancy)
-  id, user_id, vacancy_id,
+applications  -- one per (user, vacancy) OR one per (user, manual entry)
+  id, user_id, vacancy_id nullable,
+  -- manual_* set when vacancy_id is null (a vacancy Apprentio hasn't indexed);
+  -- check constraint requires vacancy_id OR (manual_employer_name AND manual_role_title)
+  manual_employer_name, manual_role_title, manual_apply_url, manual_closing_date,
   stage enum(saved|drafting|ready_for_review|approved|submitted|interview|offer|rejected|withdrawn),
   drafted_cv, drafted_cover_letter, draft_notes,
   approved_at, submitted_at, submission_method enum(manual|portal_assist),

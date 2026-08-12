@@ -49,12 +49,13 @@ export async function draftApplication(formData: FormData) {
   const { data: application } = await supabase
     .from("applications")
     .select(
-      "id, vacancies(employer_name, role_title, description, apprenticeship_level, standard_reference, location)"
+      "id, vacancy_id, vacancies(employer_name, role_title, description, apprenticeship_level, standard_reference, location)"
     )
     .eq("id", applicationId)
     .eq("user_id", user.id)
     .single<{
       id: string;
+      vacancy_id: string | null;
       vacancies: {
         employer_name: string;
         role_title: string;
@@ -65,8 +66,17 @@ export async function draftApplication(formData: FormData) {
       } | null;
     }>();
 
-  if (!application || !application.vacancies) {
+  if (!application) {
     redirect("/applications?error=Application not found");
+  }
+
+  if (!application.vacancy_id || !application.vacancies) {
+    redirect(
+      "/applications?error=" +
+        encodeURIComponent(
+          "AI drafting isn't available for manually-added applications — Apprentio doesn't have the listing details it needs to tailor a draft."
+        )
+    );
   }
 
   // Defense-in-depth against a scripted/compromised-account loop, independent
@@ -301,4 +311,89 @@ export async function markSubmitted(formData: FormData) {
   });
 
   revalidatePath("/applications");
+}
+
+// A manual entry has no draft to approve, so it can't reach 'submitted' via
+// the normal saved -> ready_for_review -> approved -> submitted path (that
+// path is gated behind draftApplication, which manual entries can't use).
+// This gives it a direct saved -> submitted transition instead, for the
+// same reason markSubmitted exists: the student applied outside the app and
+// is just recording that here.
+export async function markManualSubmitted(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const applicationId = getApplicationId(formData);
+
+  const { error } = await supabase
+    .from("applications")
+    .update({
+      stage: "submitted",
+      submitted_at: new Date().toISOString(),
+      submission_method: "manual",
+    })
+    .eq("id", applicationId)
+    .eq("user_id", user.id)
+    .eq("stage", "saved")
+    .is("vacancy_id", null);
+
+  if (error) {
+    redirect(`/applications?error=${encodeURIComponent(error.message)}`);
+  }
+
+  await logApplicationEvent(supabase, applicationId, "status_changed", {
+    from_stage: "saved",
+    to_stage: "submitted",
+  });
+
+  revalidatePath("/applications");
+  revalidatePath("/board");
+}
+
+// Tracks an apprenticeship Apprentio hasn't indexed. No vacancy_id, so no AI
+// drafting or AI interview prep — those need real listing/employer data
+// (see the vacancy_id guard in draftApplication and
+// generateInterviewPrepQuestions). Manual stage tracking, board movement,
+// and mark-submitted all work the same as a vacancy-backed application.
+export async function addManualApplication(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const employerName = (formData.get("employer_name") as string | null)?.trim();
+  const roleTitle = (formData.get("role_title") as string | null)?.trim();
+  const applyUrl = (formData.get("apply_url") as string | null)?.trim();
+  const closingDate = (formData.get("closing_date") as string | null)?.trim();
+
+  if (!employerName || !roleTitle) {
+    redirect(
+      "/applications?error=" +
+        encodeURIComponent("Employer name and role title are required")
+    );
+  }
+
+  const { error } = await supabase.from("applications").insert({
+    user_id: user.id,
+    vacancy_id: null,
+    stage: "saved",
+    manual_employer_name: employerName,
+    manual_role_title: roleTitle,
+    manual_apply_url: applyUrl || null,
+    manual_closing_date: closingDate || null,
+  });
+
+  if (error) {
+    redirect(`/applications?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/applications");
+  revalidatePath("/board");
 }
