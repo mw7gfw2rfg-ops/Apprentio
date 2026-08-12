@@ -26,22 +26,29 @@ export async function deleteAccount(formData: FormData) {
 
   const admin = createAdminClient();
 
-  // Cancel any active Stripe subscription first — once the user row is
-  // deleted (cascading to `subscriptions`), we lose the reference to it.
+  // Delete the Stripe Customer first — once the user row is deleted
+  // (cascading to `subscriptions`), we lose the reference to it. Deleting
+  // the Customer object (not just canceling the subscription) immediately
+  // cancels any active subscription on it too — that's Stripe's own
+  // documented behaviour for this call, not an assumption — so this single
+  // call is sufficient; a separate subscriptions.cancel() would be
+  // redundant. Canceling without deleting the Customer would leave a real
+  // paying user's PII (email, saved payment methods) sitting in Stripe
+  // indefinitely after their Apprentio account no longer exists.
   const { data: sub } = await admin
     .from("subscriptions")
-    .select("stripe_subscription_id")
+    .select("stripe_customer_id")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (sub?.stripe_subscription_id) {
+  if (sub?.stripe_customer_id) {
     try {
       const stripe = createStripeClient();
-      await stripe.subscriptions.cancel(sub.stripe_subscription_id);
+      await stripe.customers.del(sub.stripe_customer_id);
     } catch (err) {
-      // Already-canceled subscriptions error on a second cancel — don't let
+      // Already-deleted customers error on a second delete — don't let
       // that block account deletion.
-      console.error("Failed to cancel subscription during account deletion", err);
+      console.error("Failed to delete Stripe customer during account deletion", err);
     }
   }
 
