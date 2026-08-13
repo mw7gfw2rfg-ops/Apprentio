@@ -19,6 +19,7 @@ export type VacancyMatch = {
   closing_date: string | null;
   start_date: string | null;
   distanceMiles: number;
+  gradeSignal: string | null;
 };
 
 type VacancyDetailResult = {
@@ -86,6 +87,7 @@ export function DiscoveryBoard({
                   <Badge variant="default">{vacancy.distanceMiles.toFixed(1)} mi</Badge>
                   <Badge variant="outline">Level {vacancy.apprenticeship_level ?? "—"}</Badge>
                   <Badge variant="outline">Closes {vacancy.closing_date ?? "—"}</Badge>
+                  {vacancy.gradeSignal && <Badge variant="secondary">{vacancy.gradeSignal}</Badge>}
                 </div>
               </Link>
               <form className="absolute right-3 top-3">

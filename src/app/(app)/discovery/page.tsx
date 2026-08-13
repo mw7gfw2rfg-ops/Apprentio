@@ -4,12 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import { geocodePostcode } from "@/lib/vacancies/geocode";
 import { haversineMiles, maxCommuteMiles } from "@/lib/vacancies/distance";
 import { sectorsToFaaRoutes } from "@/lib/vacancies/sector-mapping";
+import { parseGradeEligibilitySignal } from "@/lib/vacancies/grade-signal";
+import type { FaaVacancy } from "@/lib/vacancies/faa-client";
 import { DiscoveryFilters } from "./DiscoveryFilters";
 import { DiscoveryBoard, type VacancyMatch } from "./DiscoveryBoard";
 import { getVacancyDetail, saveVacancy } from "./actions";
 
 type VacancyRow = {
   id: string;
+  source: "gov_api" | "curated";
   employer_name: string;
   role_title: string;
   apprenticeship_level: number | null;
@@ -20,6 +23,7 @@ type VacancyRow = {
   start_date: string | null;
   latitude: number | null;
   longitude: number | null;
+  raw_json: unknown;
 };
 
 const ANY = "any";
@@ -101,7 +105,7 @@ export default async function DiscoveryPage({
       let vacanciesQuery = supabase
         .from("vacancies")
         .select(
-          "id, employer_name, role_title, apprenticeship_level, sector, location, postcode, closing_date, start_date, latitude, longitude"
+          "id, source, employer_name, role_title, apprenticeship_level, sector, location, postcode, closing_date, start_date, latitude, longitude, raw_json"
         )
         .gte("closing_date", today)
         .overlaps("sector", routes)
@@ -126,10 +130,17 @@ export default async function DiscoveryPage({
 
       const withDistance = (vacancies ?? [])
         .filter((v) => v.latitude != null && v.longitude != null)
-        .map((v) => ({
-          ...v,
-          distanceMiles: haversineMiles(coords.latitude, coords.longitude, v.latitude!, v.longitude!),
-        }));
+        .map((v) => {
+          const { raw_json, ...rest } = v;
+          return {
+            ...rest,
+            distanceMiles: haversineMiles(coords.latitude, coords.longitude, v.latitude!, v.longitude!),
+            gradeSignal:
+              v.source === "gov_api"
+                ? parseGradeEligibilitySignal((raw_json as FaaVacancy | null)?.qualifications)
+                : null,
+          };
+        });
 
       const maxMiles = activeCommute != null ? maxCommuteMiles(activeCommute) : null;
       matches = withDistance

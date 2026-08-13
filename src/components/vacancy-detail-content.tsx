@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { stripHtml } from "@/lib/vacancies/format";
 import type { FaaVacancy } from "@/lib/vacancies/faa-client";
+import { parseGradeEligibilitySignal } from "@/lib/vacancies/grade-signal";
 import type { VacancyDetail } from "@/lib/vacancies/detail";
 import type { EmployerResearch } from "@/lib/drafting/employer-research";
 
@@ -38,6 +39,7 @@ export function VacancyDetailContent({
   employerResearch?: EmployerResearch | null;
 }) {
   const faa = vacancy.source === "gov_api" ? (vacancy.raw_json as FaaVacancy) : null;
+  const gradeSignal = faa ? parseGradeEligibilitySignal(faa.qualifications) : null;
 
   const fullDescription = faa ? stripHtml(faa.fullDescription) || stripHtml(faa.description) : "";
   const employerDescription = faa ? stripHtml(faa.employerDescription) : "";
@@ -71,6 +73,7 @@ export function VacancyDetailContent({
         <Badge variant="outline">
           {vacancy.start_date ? `Starts ${vacancy.start_date}` : "Start date not specified"}
         </Badge>
+        {gradeSignal && <Badge variant="secondary">{gradeSignal}</Badge>}
       </div>
 
       {employerResearch?.found && (
