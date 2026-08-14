@@ -100,12 +100,19 @@ export async function uploadBaseDocuments(formData: FormData) {
   const coverLetterFile = formData.get("cover_letter_file");
 
   const errors: string[] = [];
-  const updates: Record<string, string> = {};
+  const updates: Record<string, string | null> = {};
 
   if (cvFile instanceof File && cvFile.size > 0) {
     const result = await uploadDocument(supabase, user.id, cvFile, "cv");
     if ("error" in result) errors.push(result.error);
-    else updates.base_cv_storage_path = result.path;
+    else {
+      updates.base_cv_storage_path = result.path;
+      // base_cv_storage_path is a stable per-user path (upsert:true), so it
+      // doesn't change on re-upload -- explicitly invalidate the cached
+      // extracted text here instead, or match-score.ts would keep scoring
+      // against the old CV's content.
+      updates.base_cv_extracted_text = null;
+    }
   }
 
   if (coverLetterFile instanceof File && coverLetterFile.size > 0) {

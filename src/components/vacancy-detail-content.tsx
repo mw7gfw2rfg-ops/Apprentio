@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { stripHtml } from "@/lib/vacancies/format";
 import type { FaaVacancy } from "@/lib/vacancies/faa-client";
 import { parseGradeEligibilitySignal } from "@/lib/vacancies/grade-signal";
+import type { MatchResult } from "@/lib/matching/match-score";
 import type { VacancyDetail } from "@/lib/vacancies/detail";
 import type { EmployerResearch } from "@/lib/drafting/employer-research";
 
@@ -32,11 +34,17 @@ export function VacancyDetailContent({
   isSaved,
   saveAction,
   employerResearch,
+  matchScore,
+  hasCv,
+  showUpgradeNudge,
 }: {
   vacancy: VacancyDetail;
   isSaved: boolean;
   saveAction: (formData: FormData) => void | Promise<void>;
   employerResearch?: EmployerResearch | null;
+  matchScore: MatchResult | null;
+  hasCv: boolean;
+  showUpgradeNudge: boolean;
 }) {
   const faa = vacancy.source === "gov_api" ? (vacancy.raw_json as FaaVacancy) : null;
   const gradeSignal = faa ? parseGradeEligibilitySignal(faa.qualifications) : null;
@@ -75,6 +83,41 @@ export function VacancyDetailContent({
         </Badge>
         {gradeSignal && <Badge variant="secondary">{gradeSignal}</Badge>}
       </div>
+
+      {hasCv && matchScore && (
+        <div className="rounded-xl border p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Match with your CV
+            </h2>
+            <Badge variant={matchScore.percent >= 50 ? "default" : "secondary"}>
+              {matchScore.label} · {matchScore.percent}%
+            </Badge>
+          </div>
+          {matchScore.matchedKeywords.length > 0 && (
+            <p className="mt-2 text-sm text-foreground/80">
+              Your CV mentions: {matchScore.matchedKeywords.join(", ")}
+            </p>
+          )}
+          {showUpgradeNudge && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Save this vacancy, then upgrade to Premium for an AI-tailored CV & cover letter for
+              this specific role.
+            </p>
+          )}
+        </div>
+      )}
+
+      {!hasCv && (
+        <div className="rounded-xl border border-dashed p-4">
+          <p className="text-sm text-muted-foreground">
+            <Link href="/onboarding" className="underline">
+              Upload your base CV
+            </Link>{" "}
+            to see how well you match this vacancy.
+          </p>
+        </div>
+      )}
 
       {employerResearch?.found && (
         <div className="rounded-xl border bg-primary/5 p-4">

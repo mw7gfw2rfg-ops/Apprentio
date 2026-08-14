@@ -5,6 +5,13 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { fetchVacancyDetail, type VacancyDetail } from "@/lib/vacancies/detail";
 import { getCachedEmployerResearch, type EmployerResearch } from "@/lib/drafting/employer-research";
+import { getBaseCvText } from "@/lib/matching/cv-text-cache";
+import {
+  extractVacancyKeywords,
+  prepareCvForMatching,
+  scoreMatch,
+  type MatchResult,
+} from "@/lib/matching/match-score";
 
 const UNIQUE_VIOLATION = "23505";
 
@@ -14,9 +21,14 @@ const UNIQUE_VIOLATION = "23505";
 // the pane and the dedicated page never drift apart -- including whatever
 // employer research is already cached (read-only here; a fresh search only
 // ever runs from the draft action, never from browsing).
-export async function getVacancyDetail(
-  vacancyId: string
-): Promise<{ vacancy: VacancyDetail; isSaved: boolean; employerResearch: EmployerResearch | null } | null> {
+export async function getVacancyDetail(vacancyId: string): Promise<{
+  vacancy: VacancyDetail;
+  isSaved: boolean;
+  employerResearch: EmployerResearch | null;
+  matchScore: MatchResult | null;
+  hasCv: boolean;
+  showUpgradeNudge: boolean;
+} | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -27,7 +39,7 @@ export async function getVacancyDetail(
   const vacancy = await fetchVacancyDetail(supabase, vacancyId);
   if (!vacancy) return null;
 
-  const [{ data: savedRow }, employerResearch] = await Promise.all([
+  const [{ data: savedRow }, employerResearch, { data: profile }] = await Promise.all([
     supabase
       .from("applications")
       .select("id")
@@ -35,9 +47,35 @@ export async function getVacancyDetail(
       .eq("vacancy_id", vacancyId)
       .maybeSingle(),
     getCachedEmployerResearch(vacancy.employer_name),
+    supabase
+      .from("profiles")
+      .select("subscription_tier, base_cv_storage_path, base_cv_extracted_text")
+      .eq("user_id", user.id)
+      .single(),
   ]);
 
-  return { vacancy, isSaved: !!savedRow, employerResearch };
+  const cvText = profile
+    ? await getBaseCvText(supabase, user.id, profile.base_cv_storage_path, profile.base_cv_extracted_text)
+    : null;
+  const matchScore = cvText
+    ? scoreMatch(
+        prepareCvForMatching(cvText),
+        extractVacancyKeywords({
+          source: vacancy.source,
+          rawJson: vacancy.raw_json,
+          description: vacancy.description,
+        })
+      )
+    : null;
+
+  return {
+    vacancy,
+    isSaved: !!savedRow,
+    employerResearch,
+    matchScore,
+    hasCv: !!cvText,
+    showUpgradeNudge: profile?.subscription_tier !== "premium",
+  };
 }
 
 export async function saveVacancy(formData: FormData) {

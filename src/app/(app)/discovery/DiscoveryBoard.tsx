@@ -8,6 +8,7 @@ import { VacancyDetailContent } from "@/components/vacancy-detail-content";
 import { useDesktopSplitPane } from "@/hooks/use-desktop-split-pane";
 import type { VacancyDetail } from "@/lib/vacancies/detail";
 import type { EmployerResearch } from "@/lib/drafting/employer-research";
+import type { MatchResult } from "@/lib/matching/match-score";
 
 export type VacancyMatch = {
   id: string;
@@ -20,12 +21,16 @@ export type VacancyMatch = {
   start_date: string | null;
   distanceMiles: number;
   gradeSignal: string | null;
+  matchScore: MatchResult | null;
 };
 
 type VacancyDetailResult = {
   vacancy: VacancyDetail;
   isSaved: boolean;
   employerResearch: EmployerResearch | null;
+  matchScore: MatchResult | null;
+  hasCv: boolean;
+  showUpgradeNudge: boolean;
 };
 
 export function DiscoveryBoard({
@@ -88,6 +93,11 @@ export function DiscoveryBoard({
                   <Badge variant="outline">Level {vacancy.apprenticeship_level ?? "—"}</Badge>
                   <Badge variant="outline">Closes {vacancy.closing_date ?? "—"}</Badge>
                   {vacancy.gradeSignal && <Badge variant="secondary">{vacancy.gradeSignal}</Badge>}
+                  {vacancy.matchScore && (
+                    <Badge variant={vacancy.matchScore.percent >= 50 ? "default" : "secondary"}>
+                      {vacancy.matchScore.label} · {vacancy.matchScore.percent}%
+                    </Badge>
+                  )}
                 </div>
               </Link>
               <form className="absolute right-3 top-3">
@@ -123,6 +133,9 @@ export function DiscoveryBoard({
               vacancy={selectedResult.vacancy}
               isSaved={selectedResult.isSaved}
               employerResearch={selectedResult.employerResearch}
+              matchScore={selectedResult.matchScore}
+              hasCv={selectedResult.hasCv}
+              showUpgradeNudge={selectedResult.showUpgradeNudge}
               saveAction={async (formData) => {
                 await saveVacancy(formData);
                 setSelectedResult((prev) => (prev ? { ...prev, isSaved: true } : prev));

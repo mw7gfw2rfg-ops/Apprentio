@@ -6,6 +6,8 @@ import { haversineMiles, maxCommuteMiles } from "@/lib/vacancies/distance";
 import { sectorsToFaaRoutes } from "@/lib/vacancies/sector-mapping";
 import { parseGradeEligibilitySignal } from "@/lib/vacancies/grade-signal";
 import type { FaaVacancy } from "@/lib/vacancies/faa-client";
+import { getBaseCvText } from "@/lib/matching/cv-text-cache";
+import { extractVacancyKeywords, prepareCvForMatching, scoreMatch } from "@/lib/matching/match-score";
 import { DiscoveryFilters } from "./DiscoveryFilters";
 import { DiscoveryBoard, type VacancyMatch } from "./DiscoveryBoard";
 import { getVacancyDetail, saveVacancy } from "./actions";
@@ -24,6 +26,7 @@ type VacancyRow = {
   latitude: number | null;
   longitude: number | null;
   raw_json: unknown;
+  description: string | null;
 };
 
 const ANY = "any";
@@ -53,7 +56,7 @@ export default async function DiscoveryPage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "onboarding_complete, sectors_of_interest, postcode, max_commute_minutes, minimum_apprenticeship_level"
+      "onboarding_complete, sectors_of_interest, postcode, max_commute_minutes, minimum_apprenticeship_level, base_cv_storage_path, base_cv_extracted_text"
     )
     .eq("user_id", user.id)
     .single();
@@ -61,6 +64,18 @@ export default async function DiscoveryPage({
   if (!profile?.onboarding_complete) {
     redirect("/onboarding");
   }
+
+  // Computed once per page load regardless of how many vacancy cards
+  // render below -- the expensive part (download + PDF parse) only runs
+  // once per CV thanks to the write-through cache; scoring each card
+  // against the resulting keyword set is cheap in-memory work.
+  const cvText = await getBaseCvText(
+    supabase,
+    user.id,
+    profile.base_cv_storage_path,
+    profile.base_cv_extracted_text
+  );
+  const preparedCv = cvText ? prepareCvForMatching(cvText) : null;
 
   // Each filter falls back to the profile's own default only when its param
   // is entirely absent from the URL -- once the user has touched a control
@@ -105,7 +120,7 @@ export default async function DiscoveryPage({
       let vacanciesQuery = supabase
         .from("vacancies")
         .select(
-          "id, source, employer_name, role_title, apprenticeship_level, sector, location, postcode, closing_date, start_date, latitude, longitude, raw_json"
+          "id, source, employer_name, role_title, apprenticeship_level, sector, location, postcode, closing_date, start_date, latitude, longitude, raw_json, description"
         )
         .gte("closing_date", today)
         .overlaps("sector", routes)
@@ -131,7 +146,7 @@ export default async function DiscoveryPage({
       const withDistance = (vacancies ?? [])
         .filter((v) => v.latitude != null && v.longitude != null)
         .map((v) => {
-          const { raw_json, ...rest } = v;
+          const { raw_json, description, ...rest } = v;
           return {
             ...rest,
             distanceMiles: haversineMiles(coords.latitude, coords.longitude, v.latitude!, v.longitude!),
@@ -139,6 +154,12 @@ export default async function DiscoveryPage({
               v.source === "gov_api"
                 ? parseGradeEligibilitySignal((raw_json as FaaVacancy | null)?.qualifications)
                 : null,
+            matchScore: preparedCv
+              ? scoreMatch(
+                  preparedCv,
+                  extractVacancyKeywords({ source: v.source, rawJson: raw_json, description })
+                )
+              : null,
           };
         });
 
@@ -181,6 +202,15 @@ export default async function DiscoveryPage({
         <p className="text-sm text-muted-foreground">
           You haven&apos;t set a minimum apprenticeship level, so results below aren&apos;t
           filtered by level unless you pick one below.
+        </p>
+      )}
+
+      {!preparedCv && (
+        <p className="text-sm text-muted-foreground">
+          <Link href="/onboarding" className="underline">
+            Upload your CV
+          </Link>{" "}
+          to see match strength for each vacancy below.
         </p>
       )}
 
