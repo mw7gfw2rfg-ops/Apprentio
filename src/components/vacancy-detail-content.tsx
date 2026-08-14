@@ -60,6 +60,14 @@ export function VacancyDetailContent({
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{vacancy.role_title}</h1>
           <p className="mt-1 text-base text-muted-foreground">{vacancy.employer_name}</p>
+          <a
+            href={`https://higherin.com/search-companies?search-term=${encodeURIComponent(vacancy.employer_name)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-block text-xs text-muted-foreground underline hover:text-foreground"
+          >
+            See employer reviews on Higherin ↗
+          </a>
         </div>
         <form className="shrink-0">
           <input type="hidden" name="vacancy_id" value={vacancy.id} />
