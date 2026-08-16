@@ -17,6 +17,12 @@ const RATE_LIMITS = {
   draft: 20,
   interview_prep: 20,
   employer_research: 10,
+  // Heaviest per-call cost of any action here: an audio upload, a Whisper
+  // transcription round-trip, then a second Anthropic call for feedback --
+  // three external I/O hops per request, not one. Capped well below the
+  // others for that reason, same defense-in-depth rationale as the rest of
+  // this file.
+  interview_practice: 8,
 } as const;
 
 export type RateLimitedAction = keyof typeof RATE_LIMITS;

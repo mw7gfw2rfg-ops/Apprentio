@@ -33,6 +33,16 @@ const CSP = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Default is 1MB. Interview-practice recordings are opus/AAC audio up
+    // to ~3 minutes (matching the app's own documented video-interview
+    // answer window) submitted as a Server Action FormData payload -- a
+    // 15MB ceiling comfortably covers that with margin, while still
+    // bounding worst-case payload size server-side.
+    serverActions: {
+      bodySizeLimit: "15mb",
+    },
+  },
   async headers() {
     return [
       {

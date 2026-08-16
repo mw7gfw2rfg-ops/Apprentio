@@ -18,6 +18,7 @@ import {
 } from "@/lib/interview-prep/constants";
 import { PREP_CONTENT, VETTING_SECTION, type PrepSection } from "@/lib/interview-prep/content";
 import type { GeneratedInterviewPrep } from "@/lib/interview-prep/generate";
+import { InterviewPracticeRecorder } from "@/components/interview-practice-recorder";
 
 function Section({ section }: { section: PrepSection }) {
   return (
@@ -184,9 +185,17 @@ export function InterviewPrepDialog({
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-3">
                     {aiResult.data.questions.map((q, i) => (
-                      <div key={i} className="rounded-lg border p-3">
+                      <div key={i} className="flex flex-col rounded-lg border p-3">
                         <p className="text-sm font-medium">{q.question}</p>
                         <p className="mt-1 text-xs text-muted-foreground">{q.why_asked}</p>
+                        {(format === "video_interview" || format === "panel_interview") && (
+                          <InterviewPracticeRecorder
+                            applicationId={applicationId}
+                            question={q.question}
+                            whyAsked={q.why_asked}
+                            format={format}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
