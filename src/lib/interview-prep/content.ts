@@ -4,6 +4,20 @@ export type PrepSection = {
   heading: string;
   paragraphs: string[];
   bullets?: string[];
+  link?: { label: string; href: string };
+};
+
+// Verified live (2026-08): no employer in Apprentio's data (employer_sources
+// notes, the AI employer_research cache, or vacancies.raw_json) documents
+// which assessment provider it actually uses -- so this is deliberately
+// generic practice, not tailored to any specific employer's real test. Also
+// verified live: this specific AssessmentDay page is genuinely free with no
+// signup wall (unlike AssessmentDay's own homepage funnel, and unlike
+// Graduates First's "FREE tests" nav item, which actually leads to a full
+// account registration form).
+const FREE_PRACTICE_LINK = {
+  label: "Practice sample aptitude test questions on AssessmentDay",
+  href: "https://www.assessmentday.co.uk/resources/aptitude-test-sample-questions-answers.html",
 };
 
 // Shown under Video interview and Panel interview -- the structuring
@@ -46,6 +60,13 @@ const ONLINE_TESTS: PrepSection[] = [
       "If it feels like it's asking how you'd feel about something, not just what you'd do — it's probably strengths-based. Be genuine.",
       "If it's clearly testing \"what's the right way to handle this customer/colleague\" — it's probably traditional. Think about what the employer's values/competencies (from the job description) would favour.",
     ],
+  },
+  {
+    heading: "Free general practice",
+    paragraphs: [
+      "Apprentio doesn't have documented information on which test provider this specific employer actually uses, so this isn't tailored to their real test — it's general practice with the numerical, verbal and logical reasoning question formats above.",
+    ],
+    link: FREE_PRACTICE_LINK,
   },
 ];
 
@@ -111,6 +132,13 @@ const ASSESSMENT_CENTRE: PrepSection[] = [
       "Structure beats content: a clear beginning/middle/end with a strong final point outperforms cramming in more facts.",
       "Prepare for 2-3 likely follow-up questions on your topic — being asked something is normal, not a sign it went badly.",
     ],
+  },
+  {
+    heading: "Free general practice",
+    paragraphs: [
+      "Some assessment centres include a numerical/verbal/logical reasoning test as one of the exercises. Apprentio doesn't have documented information on which test provider this specific employer actually uses, so this isn't tailored to their real test — it's general practice with the format.",
+    ],
+    link: FREE_PRACTICE_LINK,
   },
 ];
 

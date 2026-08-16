@@ -38,6 +38,17 @@ function Section({ section }: { section: PrepSection }) {
           ))}
         </ul>
       )}
+      {section.link && (
+        <a
+          href={section.link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-flex w-fit items-center gap-1 text-sm font-medium text-primary hover:underline"
+        >
+          {section.link.label}
+          <span aria-hidden>↗</span>
+        </a>
+      )}
     </div>
   );
 }
