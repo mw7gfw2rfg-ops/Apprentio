@@ -11,6 +11,7 @@ import {
   markManualSubmitted,
   markSubmitted,
   rejectApplication,
+  saveReflectionNote,
 } from "./actions";
 
 const FREE_DRAFT_LIMIT = 2;
@@ -21,6 +22,7 @@ type ApplicationRow = {
   drafted_cv: string | null;
   drafted_cover_letter: string | null;
   draft_notes: string | null;
+  reflection_note: string | null;
   approved_at: string | null;
   submitted_at: string | null;
   vacancy_id: string | null;
@@ -73,7 +75,7 @@ export default async function ApplicationsPage({
   const { data: applications } = await supabase
     .from("applications")
     .select(
-      "id, stage, drafted_cv, drafted_cover_letter, draft_notes, approved_at, submitted_at, vacancy_id, manual_employer_name, manual_role_title, manual_apply_url, manual_closing_date, vacancies(employer_name, role_title, apply_url, closing_date)"
+      "id, stage, drafted_cv, drafted_cover_letter, draft_notes, reflection_note, approved_at, submitted_at, vacancy_id, manual_employer_name, manual_role_title, manual_apply_url, manual_closing_date, vacancies(employer_name, role_title, apply_url, closing_date)"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -135,6 +137,7 @@ export default async function ApplicationsPage({
             rejectApplication={rejectApplication}
             markSubmitted={markSubmitted}
             markManualSubmitted={markManualSubmitted}
+            saveReflectionNote={saveReflectionNote}
           />
         ))}
       </div>

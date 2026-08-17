@@ -353,6 +353,39 @@ export async function markManualSubmitted(formData: FormData) {
   revalidatePath("/board");
 }
 
+// Purely private user content, not an AI or processing action -- no
+// application_event logged for it (unlike every stage/draft change above),
+// since this isn't part of the application's processing history, just the
+// student's own notes to themselves. Scoped to stage = 'rejected' so it
+// can't be set or edited on any other stage, same pattern as every other
+// stage-scoped update in this file. Genuinely optional: an empty submission
+// clears the note rather than erroring, and there's no separate "required"
+// path -- rejected is a terminal stage, so nothing else depends on this
+// being filled in.
+export async function saveReflectionNote(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const applicationId = getApplicationId(formData);
+  const note = ((formData.get("reflection_note") as string | null) ?? "").trim();
+
+  const { error } = await supabase
+    .from("applications")
+    .update({ reflection_note: note || null })
+    .eq("id", applicationId)
+    .eq("user_id", user.id)
+    .eq("stage", "rejected");
+
+  if (error) {
+    redirect(`/applications?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/applications");
+}
+
 // Tracks an apprenticeship Apprentio hasn't indexed. No vacancy_id, so no AI
 // drafting or AI interview prep — those need real listing/employer data
 // (see the vacancy_id guard in draftApplication and

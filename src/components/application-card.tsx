@@ -39,6 +39,7 @@ type ApplicationRow = {
   drafted_cv: string | null;
   drafted_cover_letter: string | null;
   draft_notes: string | null;
+  reflection_note: string | null;
   approved_at: string | null;
   submitted_at: string | null;
   vacancy_id: string | null;
@@ -98,6 +99,60 @@ function ReadinessIndicator({ readiness }: { readiness: ReturnType<typeof comput
   );
 }
 
+// Optional and private -- collapsed behind "Add a note" until either the
+// student opens it or a note already exists (so a previously-saved note is
+// never hidden behind an extra click). Re-submitting the same form after
+// editing is how "editable afterward" works: no separate edit mode, the
+// textarea is always the live editable value.
+function ReflectionNote({
+  applicationId,
+  initialNote,
+  saveReflectionNote,
+}: {
+  applicationId: string;
+  initialNote: string | null;
+  saveReflectionNote: (formData: FormData) => void;
+}) {
+  const [expanded, setExpanded] = useState(Boolean(initialNote));
+
+  if (!expanded) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => setExpanded(true)}
+        className="self-start text-xs"
+      >
+        Add a note
+      </Button>
+    );
+  }
+
+  return (
+    <form action={saveReflectionNote} className="flex flex-col gap-1.5 border-t pt-3">
+      <input type="hidden" name="application_id" value={applicationId} />
+      <Label
+        htmlFor={`reflection-${applicationId}`}
+        className="text-xs uppercase text-muted-foreground"
+      >
+        Private note (optional)
+      </Label>
+      <Textarea
+        id={`reflection-${applicationId}`}
+        name="reflection_note"
+        defaultValue={initialNote ?? ""}
+        rows={3}
+        placeholder="What might you do differently next time?"
+        className="text-sm"
+      />
+      <Button type="submit" variant="outline" size="sm" className="self-start">
+        Save note
+      </Button>
+    </form>
+  );
+}
+
 export function ApplicationCard({
   application,
   canDraft,
@@ -111,6 +166,7 @@ export function ApplicationCard({
   rejectApplication,
   markSubmitted,
   markManualSubmitted,
+  saveReflectionNote,
 }: {
   application: ApplicationRow;
   canDraft: boolean;
@@ -124,6 +180,7 @@ export function ApplicationCard({
   rejectApplication: (formData: FormData) => void;
   markSubmitted: (formData: FormData) => void;
   markManualSubmitted: (formData: FormData) => void;
+  saveReflectionNote: (formData: FormData) => void;
 }) {
   const [editOpen, setEditOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
@@ -351,6 +408,14 @@ export function ApplicationCard({
             Submitted{" "}
             {application.submitted_at && new Date(application.submitted_at).toLocaleString()}
           </p>
+        )}
+
+        {application.stage === "rejected" && (
+          <ReflectionNote
+            applicationId={application.id}
+            initialNote={application.reflection_note}
+            saveReflectionNote={saveReflectionNote}
+          />
         )}
 
         {INTERVIEW_PREP_STAGES.includes(
