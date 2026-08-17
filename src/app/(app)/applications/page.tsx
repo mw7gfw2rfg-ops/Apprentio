@@ -79,6 +79,18 @@ export default async function ApplicationsPage({
     .order("created_at", { ascending: false })
     .returns<ApplicationRow[]>();
 
+  // Backs the "Interview prep engaged" readiness step -- a real recorded
+  // practice attempt, not just having opened the prep dialog (which isn't
+  // persisted anywhere). One cheap query for the whole list rather than
+  // one per card.
+  const { data: practiceAttempts } = await supabase
+    .from("interview_practice_attempts")
+    .select("application_id")
+    .eq("user_id", user.id);
+  const applicationIdsWithPractice = new Set(
+    (practiceAttempts ?? []).map((row) => row.application_id)
+  );
+
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-10">
       <div className="flex items-start justify-between gap-4">
@@ -114,6 +126,7 @@ export default async function ApplicationsPage({
             application={application}
             canDraft={canDraft}
             hasBaseDocuments={hasBaseDocuments}
+            hasPracticeAttempt={applicationIdsWithPractice.has(application.id)}
             isPremium={isPremium}
             freeDraftsRemaining={freeDraftsRemaining}
             draftApplication={draftApplication}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Circle } from "lucide-react";
 import {
   Card,
   CardAction,
@@ -25,11 +25,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DraftSubmitButton } from "@/app/(app)/applications/DraftSubmitButton";
 import { InterviewPrepDialog } from "@/components/interview-prep-dialog";
 import { generateInterviewPrepQuestions } from "@/app/(app)/applications/interview-prep-actions";
 import { INTERVIEW_PREP_STAGES } from "@/lib/interview-prep/constants";
 import { isGovernmentEmployer } from "@/lib/interview-prep/government";
+import { computeReadiness } from "@/lib/applications/readiness";
 
 type ApplicationRow = {
   id: string;
@@ -60,10 +62,47 @@ const STAGE_BADGE_VARIANT: Record<string, "outline" | "default" | "secondary"> =
   submitted: "secondary",
 };
 
+function ReadinessIndicator({ readiness }: { readiness: ReturnType<typeof computeReadiness> }) {
+  if (readiness.total === 0) return null;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <div className="flex w-fit cursor-default items-center gap-1.5 text-xs text-muted-foreground" />
+        }
+      >
+        <span className="flex items-center gap-0.5">
+          {readiness.steps.map((step) =>
+            step.done ? (
+              <CheckCircle2 key={step.key} className="size-3.5 text-primary" />
+            ) : (
+              <Circle key={step.key} className="size-3.5 text-muted-foreground/35" />
+            )
+          )}
+        </span>
+        <span>
+          {readiness.completed}/{readiness.total} ready
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        <ul className="flex flex-col gap-0.5">
+          {readiness.steps.map((step) => (
+            <li key={step.key}>
+              {step.done ? "✓" : "○"} {step.label}
+            </li>
+          ))}
+        </ul>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function ApplicationCard({
   application,
   canDraft,
   hasBaseDocuments,
+  hasPracticeAttempt,
   isPremium,
   freeDraftsRemaining,
   draftApplication,
@@ -76,6 +115,7 @@ export function ApplicationCard({
   application: ApplicationRow;
   canDraft: boolean;
   hasBaseDocuments: boolean;
+  hasPracticeAttempt: boolean;
   isPremium: boolean;
   freeDraftsRemaining: number;
   draftApplication: (formData: FormData) => void;
@@ -88,6 +128,16 @@ export function ApplicationCard({
   const [editOpen, setEditOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const isManual = !application.vacancies;
+  const readiness = computeReadiness({
+    isManual,
+    hasBaseDocuments,
+    isApproved: Boolean(application.approved_at),
+    isSubmitted: Boolean(application.submitted_at),
+    interviewPrepAvailable: INTERVIEW_PREP_STAGES.includes(
+      application.stage as (typeof INTERVIEW_PREP_STAGES)[number]
+    ),
+    hasPracticeAttempt,
+  });
   const vacancy = {
     role_title:
       application.vacancies?.role_title ?? application.manual_role_title ?? "Untitled role",
@@ -102,6 +152,7 @@ export function ApplicationCard({
       <CardHeader>
         <CardTitle>{vacancy.role_title}</CardTitle>
         <CardDescription>{vacancy.employer_name}</CardDescription>
+        <ReadinessIndicator readiness={readiness} />
         <CardAction>
           <Badge variant={STAGE_BADGE_VARIANT[application.stage] ?? "outline"}>
             {application.stage.replaceAll("_", " ")}
