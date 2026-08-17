@@ -6,6 +6,7 @@ import { getCachedEmployerResearch } from "@/lib/drafting/employer-research";
 import { getBaseCvText } from "@/lib/matching/cv-text-cache";
 import { extractVacancyKeywords, prepareCvForMatching, scoreMatch } from "@/lib/matching/match-score";
 import { VacancyDetailContent } from "@/components/vacancy-detail-content";
+import type { StudentGradeProfile } from "@/lib/vacancies/grade-match";
 import { saveVacancy } from "../../discovery/actions";
 
 export default async function VacancyDetailPage({
@@ -26,7 +27,7 @@ export default async function VacancyDetailPage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "onboarding_complete, subscription_tier, base_cv_storage_path, base_cv_extracted_text"
+      "onboarding_complete, subscription_tier, base_cv_storage_path, base_cv_extracted_text, subjects, grades, predicted_grades"
     )
     .eq("user_id", user.id)
     .single();
@@ -34,6 +35,12 @@ export default async function VacancyDetailPage({
   if (!profile?.onboarding_complete) {
     redirect("/onboarding");
   }
+
+  const studentGrades: StudentGradeProfile = {
+    subjects: profile.subjects ?? [],
+    grades: (profile.grades as Record<string, string> | null) ?? {},
+    predictedGrades: (profile.predicted_grades as Record<string, string> | null) ?? {},
+  };
 
   const vacancy = await fetchVacancyDetail(supabase, id);
 
@@ -81,6 +88,7 @@ export default async function VacancyDetailPage({
         matchScore={matchScore}
         hasCv={!!cvText}
         showUpgradeNudge={profile.subscription_tier !== "premium"}
+        studentGrades={studentGrades}
       />
     </main>
   );

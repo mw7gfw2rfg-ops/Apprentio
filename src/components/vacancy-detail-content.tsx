@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import { stripHtml } from "@/lib/vacancies/format";
 import type { FaaVacancy } from "@/lib/vacancies/faa-client";
 import { parseGradeEligibilitySignal } from "@/lib/vacancies/grade-signal";
+import {
+  personalizeGradeSignal,
+  GRADE_MATCH_BADGE_VARIANT,
+  type StudentGradeProfile,
+} from "@/lib/vacancies/grade-match";
 import type { MatchResult } from "@/lib/matching/match-score";
 import type { VacancyDetail } from "@/lib/vacancies/detail";
 import type { EmployerResearch } from "@/lib/drafting/employer-research";
@@ -37,6 +42,7 @@ export function VacancyDetailContent({
   matchScore,
   hasCv,
   showUpgradeNudge,
+  studentGrades,
 }: {
   vacancy: VacancyDetail;
   isSaved: boolean;
@@ -45,9 +51,11 @@ export function VacancyDetailContent({
   matchScore: MatchResult | null;
   hasCv: boolean;
   showUpgradeNudge: boolean;
+  studentGrades: StudentGradeProfile;
 }) {
   const faa = vacancy.source === "gov_api" ? (vacancy.raw_json as FaaVacancy) : null;
   const gradeSignal = faa ? parseGradeEligibilitySignal(faa.qualifications) : null;
+  const personalizedGrade = faa ? personalizeGradeSignal(faa.qualifications, studentGrades) : null;
 
   const fullDescription = faa ? stripHtml(faa.fullDescription) || stripHtml(faa.description) : "";
   const employerDescription = faa ? stripHtml(faa.employerDescription) : "";
@@ -90,6 +98,11 @@ export function VacancyDetailContent({
           {vacancy.start_date ? `Starts ${vacancy.start_date}` : "Start date not specified"}
         </Badge>
         {gradeSignal && <Badge variant="secondary">{gradeSignal}</Badge>}
+        {personalizedGrade && (
+          <Badge variant={GRADE_MATCH_BADGE_VARIANT[personalizedGrade.status]}>
+            {personalizedGrade.label}
+          </Badge>
+        )}
       </div>
 
       {hasCv && matchScore && (

@@ -1,11 +1,11 @@
 import type { FaaQualification } from "./faa-client";
 
 // Soft, display-only signal built from raw_json.qualifications on gov_api
-// listings -- NOT a personalised match against the student's own grades
-// (those are collected on the A*-U scale during onboarding, while most
-// vacancy requirements here use the 9-1 numeric scale; translating between
-// the two is a separate, harder problem for a later pass). This only
-// summarises what the vacancy itself asks for.
+// listings. This only summarises what the vacancy itself asks for -- it is
+// NOT a personalised match against the student's own grades. That
+// comparison (translating between onboarding's A*-U scale and the 9-1
+// numeric scale used here) is built separately in ./grade-match.ts, reusing
+// parseGradeRequirements below rather than re-parsing the raw data.
 //
 // Deliberately conservative: research against 2,100+ real gov_api rows
 // (see TODO.md) found `qualifications` reliably structured
@@ -18,7 +18,7 @@ import type { FaaQualification } from "./faa-client";
 // silently drops an unparsed requirement would misrepresent completeness,
 // which is worse than showing nothing.
 
-type ParsedRequirement = {
+export type ParsedRequirement = {
   subject: "English" | "Maths" | "Maths & English" | "Science";
   grade: string;
 };
@@ -135,9 +135,15 @@ const SUBJECT_ORDER: Record<ParsedRequirement["subject"], number> = {
   Science: 2,
 };
 
-export function parseGradeEligibilitySignal(
+// Structured form of the same whitelist parse used by
+// parseGradeEligibilitySignal below -- exported so other modules (the
+// personalised grade-match comparison in grade-match.ts) can reuse the
+// exact same conservative parsing instead of re-implementing it. Same
+// suppression rule applies: returns null if there's nothing to parse, or
+// if ANY Essential entry fails to parse confidently.
+export function parseGradeRequirements(
   qualifications: FaaQualification[] | null | undefined
-): string | null {
+): ParsedRequirement[] | null {
   if (!qualifications || qualifications.length === 0) return null;
 
   const essential = qualifications.filter((q) => q.weighting === "Essential");
@@ -151,6 +157,14 @@ export function parseGradeEligibilitySignal(
     if (!subject || !grade) return null;
     parsed.push({ subject, grade });
   }
+  return parsed;
+}
+
+export function parseGradeEligibilitySignal(
+  qualifications: FaaQualification[] | null | undefined
+): string | null {
+  const parsed = parseGradeRequirements(qualifications);
+  if (!parsed) return null;
 
   // group by grade, join subjects sharing that grade
   const byGrade = new Map<string, Set<ParsedRequirement["subject"]>>();

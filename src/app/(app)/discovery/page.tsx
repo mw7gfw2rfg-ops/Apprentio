@@ -5,6 +5,7 @@ import { geocodePostcode } from "@/lib/vacancies/geocode";
 import { haversineMiles, maxCommuteMiles } from "@/lib/vacancies/distance";
 import { sectorsToFaaRoutes } from "@/lib/vacancies/sector-mapping";
 import { parseGradeEligibilitySignal } from "@/lib/vacancies/grade-signal";
+import { personalizeGradeSignal, type StudentGradeProfile } from "@/lib/vacancies/grade-match";
 import type { FaaVacancy } from "@/lib/vacancies/faa-client";
 import { getBaseCvText } from "@/lib/matching/cv-text-cache";
 import { extractVacancyKeywords, prepareCvForMatching, scoreMatch } from "@/lib/matching/match-score";
@@ -56,7 +57,7 @@ export default async function DiscoveryPage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "onboarding_complete, sectors_of_interest, postcode, max_commute_minutes, minimum_apprenticeship_level, base_cv_storage_path, base_cv_extracted_text"
+      "onboarding_complete, sectors_of_interest, postcode, max_commute_minutes, minimum_apprenticeship_level, base_cv_storage_path, base_cv_extracted_text, subjects, grades, predicted_grades"
     )
     .eq("user_id", user.id)
     .single();
@@ -64,6 +65,12 @@ export default async function DiscoveryPage({
   if (!profile?.onboarding_complete) {
     redirect("/onboarding");
   }
+
+  const studentGrades: StudentGradeProfile = {
+    subjects: profile.subjects ?? [],
+    grades: (profile.grades as Record<string, string> | null) ?? {},
+    predictedGrades: (profile.predicted_grades as Record<string, string> | null) ?? {},
+  };
 
   // Computed once per page load regardless of how many vacancy cards
   // render below -- the expensive part (download + PDF parse) only runs
@@ -147,13 +154,14 @@ export default async function DiscoveryPage({
         .filter((v) => v.latitude != null && v.longitude != null)
         .map((v) => {
           const { raw_json, description, ...rest } = v;
+          const qualifications =
+            v.source === "gov_api" ? (raw_json as FaaVacancy | null)?.qualifications : undefined;
           return {
             ...rest,
             distanceMiles: haversineMiles(coords.latitude, coords.longitude, v.latitude!, v.longitude!),
-            gradeSignal:
-              v.source === "gov_api"
-                ? parseGradeEligibilitySignal((raw_json as FaaVacancy | null)?.qualifications)
-                : null,
+            gradeSignal: v.source === "gov_api" ? parseGradeEligibilitySignal(qualifications) : null,
+            personalizedGrade:
+              v.source === "gov_api" ? personalizeGradeSignal(qualifications, studentGrades) : null,
             matchScore: preparedCv
               ? scoreMatch(
                   preparedCv,
@@ -244,6 +252,7 @@ export default async function DiscoveryPage({
         savedIds={savedIds}
         saveVacancy={saveVacancy}
         getVacancyDetail={getVacancyDetail}
+        studentGrades={studentGrades}
       />
     </main>
   );

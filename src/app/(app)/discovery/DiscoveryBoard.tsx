@@ -9,6 +9,11 @@ import { useDesktopSplitPane } from "@/hooks/use-desktop-split-pane";
 import type { VacancyDetail } from "@/lib/vacancies/detail";
 import type { EmployerResearch } from "@/lib/drafting/employer-research";
 import type { MatchResult } from "@/lib/matching/match-score";
+import {
+  GRADE_MATCH_BADGE_VARIANT,
+  type PersonalizedGradeMatch,
+  type StudentGradeProfile,
+} from "@/lib/vacancies/grade-match";
 
 export type VacancyMatch = {
   id: string;
@@ -21,6 +26,7 @@ export type VacancyMatch = {
   start_date: string | null;
   distanceMiles: number;
   gradeSignal: string | null;
+  personalizedGrade: PersonalizedGradeMatch | null;
   matchScore: MatchResult | null;
 };
 
@@ -38,11 +44,13 @@ export function DiscoveryBoard({
   savedIds,
   saveVacancy,
   getVacancyDetail,
+  studentGrades,
 }: {
   matches: VacancyMatch[];
   savedIds: string[];
   saveVacancy: (formData: FormData) => void | Promise<void>;
   getVacancyDetail: (id: string) => Promise<VacancyDetailResult | null>;
+  studentGrades: StudentGradeProfile;
 }) {
   const isDesktop = useDesktopSplitPane();
   const savedSet = new Set(savedIds);
@@ -93,6 +101,11 @@ export function DiscoveryBoard({
                   <Badge variant="outline">Level {vacancy.apprenticeship_level ?? "—"}</Badge>
                   <Badge variant="outline">Closes {vacancy.closing_date ?? "—"}</Badge>
                   {vacancy.gradeSignal && <Badge variant="secondary">{vacancy.gradeSignal}</Badge>}
+                  {vacancy.personalizedGrade && (
+                    <Badge variant={GRADE_MATCH_BADGE_VARIANT[vacancy.personalizedGrade.status]}>
+                      {vacancy.personalizedGrade.label}
+                    </Badge>
+                  )}
                   {vacancy.matchScore && (
                     <Badge variant={vacancy.matchScore.percent >= 50 ? "default" : "secondary"}>
                       {vacancy.matchScore.label} · {vacancy.matchScore.percent}%
@@ -136,6 +149,7 @@ export function DiscoveryBoard({
               matchScore={selectedResult.matchScore}
               hasCv={selectedResult.hasCv}
               showUpgradeNudge={selectedResult.showUpgradeNudge}
+              studentGrades={studentGrades}
               saveAction={async (formData) => {
                 await saveVacancy(formData);
                 setSelectedResult((prev) => (prev ? { ...prev, isSaved: true } : prev));
