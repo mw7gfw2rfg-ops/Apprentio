@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireProfile } from "@/lib/supabase/profile";
 import { geocodePostcode } from "@/lib/vacancies/geocode";
 import { haversineMiles, maxCommuteMiles } from "@/lib/vacancies/distance";
 import { sectorsToFaaRoutes } from "@/lib/vacancies/sector-mapping";
@@ -54,15 +55,24 @@ export default async function DiscoveryPage({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select(
-      "onboarding_complete, sectors_of_interest, postcode, max_commute_minutes, minimum_apprenticeship_level, base_cv_storage_path, base_cv_extracted_text, subjects, grades, predicted_grades"
-    )
-    .eq("user_id", user.id)
-    .single();
+  const profile = await requireProfile<{
+    onboarding_complete: boolean;
+    sectors_of_interest: string[] | null;
+    postcode: string | null;
+    max_commute_minutes: number | null;
+    minimum_apprenticeship_level: number | null;
+    base_cv_storage_path: string | null;
+    base_cv_extracted_text: string | null;
+    subjects: string[] | null;
+    grades: unknown;
+    predicted_grades: unknown;
+  }>(
+    supabase,
+    user.id,
+    "onboarding_complete, sectors_of_interest, postcode, max_commute_minutes, minimum_apprenticeship_level, base_cv_storage_path, base_cv_extracted_text, subjects, grades, predicted_grades"
+  );
 
-  if (!profile?.onboarding_complete) {
+  if (!profile.onboarding_complete) {
     redirect("/onboarding");
   }
 

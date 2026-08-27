@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, CreditCard, Search } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { requireProfile } from "@/lib/supabase/profile";
 import { createCheckoutSession, createPortalSession } from "@/app/billing/actions";
 import {
   Card,
@@ -33,17 +34,17 @@ export default async function DashboardPage({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("onboarding_complete, subscription_tier, free_drafts_used")
-    .eq("user_id", user.id)
-    .single();
+  const profile = await requireProfile<{
+    onboarding_complete: boolean;
+    subscription_tier: string;
+    free_drafts_used: number;
+  }>(supabase, user.id, "onboarding_complete, subscription_tier, free_drafts_used");
 
-  if (!profile?.onboarding_complete) {
+  if (!profile.onboarding_complete) {
     redirect("/onboarding");
   }
 
-  const isPremium = profile?.subscription_tier === "premium";
+  const isPremium = profile.subscription_tier === "premium";
 
   const { data: applications } = await supabase
     .from("applications")

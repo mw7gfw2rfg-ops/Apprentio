@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireProfile } from "@/lib/supabase/profile";
 import { fetchVacancyDetail } from "@/lib/vacancies/detail";
 import { getCachedEmployerResearch } from "@/lib/drafting/employer-research";
 import { getBaseCvText } from "@/lib/matching/cv-text-cache";
@@ -24,15 +25,21 @@ export default async function VacancyDetailPage({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select(
-      "onboarding_complete, subscription_tier, base_cv_storage_path, base_cv_extracted_text, subjects, grades, predicted_grades"
-    )
-    .eq("user_id", user.id)
-    .single();
+  const profile = await requireProfile<{
+    onboarding_complete: boolean;
+    subscription_tier: string;
+    base_cv_storage_path: string | null;
+    base_cv_extracted_text: string | null;
+    subjects: string[] | null;
+    grades: unknown;
+    predicted_grades: unknown;
+  }>(
+    supabase,
+    user.id,
+    "onboarding_complete, subscription_tier, base_cv_storage_path, base_cv_extracted_text, subjects, grades, predicted_grades"
+  );
 
-  if (!profile?.onboarding_complete) {
+  if (!profile.onboarding_complete) {
     redirect("/onboarding");
   }
 

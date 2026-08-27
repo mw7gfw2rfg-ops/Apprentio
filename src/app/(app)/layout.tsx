@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireProfile } from "@/lib/supabase/profile";
 import { isAdminEmail } from "@/lib/admin";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AccentStyle } from "@/components/accent-style";
@@ -16,17 +17,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("onboarding_complete, subscription_tier, accent_color")
-    .eq("user_id", user.id)
-    .single();
+  const profile = await requireProfile<{
+    onboarding_complete: boolean;
+    subscription_tier: string;
+    accent_color: string;
+  }>(supabase, user.id, "onboarding_complete, subscription_tier, accent_color");
 
-  if (!profile?.onboarding_complete) {
+  if (!profile.onboarding_complete) {
     redirect("/onboarding");
   }
 
-  const isPremium = profile?.subscription_tier === "premium";
+  const isPremium = profile.subscription_tier === "premium";
 
   return (
     <SidebarProvider>

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireProfile } from "@/lib/supabase/profile";
 import { ApplicationCard } from "@/components/application-card";
 import { Badge } from "@/components/ui/badge";
 import { AddManualApplicationDialog } from "./AddManualApplicationDialog";
@@ -53,15 +54,19 @@ export default async function ApplicationsPage({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select(
-      "onboarding_complete, subscription_tier, free_drafts_used, base_cv_storage_path, base_cover_letter_storage_path"
-    )
-    .eq("user_id", user.id)
-    .single();
+  const profile = await requireProfile<{
+    onboarding_complete: boolean;
+    subscription_tier: string;
+    free_drafts_used: number;
+    base_cv_storage_path: string | null;
+    base_cover_letter_storage_path: string | null;
+  }>(
+    supabase,
+    user.id,
+    "onboarding_complete, subscription_tier, free_drafts_used, base_cv_storage_path, base_cover_letter_storage_path"
+  );
 
-  if (!profile?.onboarding_complete) {
+  if (!profile.onboarding_complete) {
     redirect("/onboarding");
   }
 

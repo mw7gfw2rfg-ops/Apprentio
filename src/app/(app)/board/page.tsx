@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireProfile } from "@/lib/supabase/profile";
 import { BoardColumns, type BoardApplication } from "./BoardColumns";
 
 export default async function BoardPage({
@@ -17,13 +18,13 @@ export default async function BoardPage({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("onboarding_complete")
-    .eq("user_id", user.id)
-    .single();
+  const profile = await requireProfile<{ onboarding_complete: boolean }>(
+    supabase,
+    user.id,
+    "onboarding_complete"
+  );
 
-  if (!profile?.onboarding_complete) {
+  if (!profile.onboarding_complete) {
     redirect("/onboarding");
   }
 
