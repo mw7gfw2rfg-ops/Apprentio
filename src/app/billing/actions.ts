@@ -41,6 +41,10 @@ export async function createCheckoutSession() {
     mode: "subscription",
     line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
     client_reference_id: user.id,
+    // Lets beta testers apply the BETA promo code (see docs/beta-testing.md)
+    // for 100%-off premium — still flows through the real Stripe webhook,
+    // so subscription_tier's single-writer invariant above is untouched.
+    allow_promotion_codes: true,
     ...(existingSub?.stripe_customer_id
       ? { customer: existingSub.stripe_customer_id }
       : { customer_email: user.email }),
