@@ -49,7 +49,7 @@ export default async function ResetPasswordPage({
             At least 8 characters.
           </span>
         </div>
-        <Button formAction={resetPassword} size="lg" className="mt-2">
+        <Button type="submit" formAction={resetPassword} size="lg" className="mt-2">
           Update password
         </Button>
       </form>

@@ -67,7 +67,7 @@ export default async function LoginPage({
             className="h-11 rounded-2xl px-4 text-base"
           />
         </div>
-        <Button formAction={login} size="lg" className="mt-2">
+        <Button type="submit" formAction={login} size="lg" className="mt-2">
           Log in
         </Button>
       </form>

@@ -76,7 +76,7 @@ export default async function SignupPage({
             At least 8 characters.
           </span>
         </div>
-        <Button formAction={signup} size="lg" className="mt-2">
+        <Button type="submit" formAction={signup} size="lg" className="mt-2">
           Sign up
         </Button>
       </form>

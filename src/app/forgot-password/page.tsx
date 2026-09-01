@@ -56,7 +56,7 @@ export default async function ForgotPasswordPage({
             className="h-11 rounded-2xl px-4 text-base"
           />
         </div>
-        <Button formAction={requestPasswordReset} size="lg" className="mt-2">
+        <Button type="submit" formAction={requestPasswordReset} size="lg" className="mt-2">
           Send reset link
         </Button>
       </form>
