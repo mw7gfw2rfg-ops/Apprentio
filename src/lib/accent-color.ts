@@ -1,16 +1,21 @@
 // Turns a single user-picked hex color into the small set of CSS custom
-// properties the design system actually needs (primary/ring for both light
-// and dark mode, plus a readable foreground). Only lightness is ever
-// adjusted -- hue and saturation are the user's choice and stay untouched.
-// The default indigo returns the exact oklch values already baked into
-// globals.css, so picking the default (or never opening settings) produces
-// byte-identical output to before this feature existed.
+// properties the design system needs. Primary button fills are fixed
+// charcoal/cream in the redesign (not accent-driven), so "accent" now
+// personalizes the things the redesign itself tints per-context: the active
+// sidebar nav item, the account avatar, the tier badge chip, the focus
+// ring, and the colored drop-shadow under primary buttons. The default sage
+// color returns the exact hex values already baked into globals.css, so
+// picking the default (or never opening settings) produces byte-identical
+// output to before this feature existed.
 
-export const DEFAULT_ACCENT_COLOR = "#4f46e5";
+export const DEFAULT_ACCENT_COLOR = "#7fb8a0";
 
 export type AccentTokens = {
-  primary: string;
-  foreground: string;
+  /** Light background tint -- active nav item, avatar circle, badge chip. */
+  tint: string;
+  /** Darker, saturated foreground paired with `tint`. */
+  tintForeground: string;
+  /** Mid-tone used for the focus ring and button drop-shadow accent. */
   ring: string;
 };
 
@@ -20,20 +25,12 @@ export type AccentTokenSet = {
 };
 
 const DEFAULT_TOKENS: AccentTokenSet = {
-  light: {
-    primary: "oklch(51.1% 0.262 276.966)",
-    foreground: "oklch(0.985 0 0)",
-    ring: "oklch(58.5% 0.233 277.117)",
-  },
-  dark: {
-    primary: "oklch(58.5% 0.233 277.117)",
-    foreground: "oklch(0.985 0 0)",
-    ring: "oklch(67.3% 0.182 276.935)",
-  },
+  light: { tint: "#dcede4", tintForeground: "#35604d", ring: "#7fb8a0" },
+  dark: { tint: "#24352c", tintForeground: "#9fd6bc", ring: "#8fcbb0" },
 };
 
-const NEAR_WHITE = "oklch(0.985 0 0)";
-const NEAR_BLACK = "oklch(0.145 0 0)";
+const NEAR_WHITE = "#f3ede2";
+const NEAR_BLACK = "#241f19";
 
 export function isValidHexColor(value: string): value is string {
   return /^#[0-9a-fA-F]{6}$/.test(value);
@@ -121,7 +118,7 @@ function relativeLuminance(r: number, g: number, b: number): number {
 
 function foregroundFor(hex: string): string {
   const [r, g, b] = hexToRgb(hex);
-  return relativeLuminance(r, g, b) > 0.179 ? NEAR_BLACK : NEAR_WHITE;
+  return relativeLuminance(r, g, b) > 0.5 ? NEAR_BLACK : NEAR_WHITE;
 }
 
 function withLightness(hex: string, l: number): string {
@@ -136,32 +133,32 @@ function clampLightness(hex: string, min: number, max: number): string {
   return withLightness(hex, Math.min(max, Math.max(min, l)));
 }
 
-function nudgeLightness(hex: string, delta: number): string {
-  const [r, g, b] = hexToRgb(hex);
-  const [, , l] = rgbToHsl(r, g, b);
-  return withLightness(hex, Math.min(92, Math.max(0, l + delta)));
-}
-
 export function computeAccentTokens(hex: string): AccentTokenSet {
   if (!isValidHexColor(hex) || hex.toLowerCase() === DEFAULT_ACCENT_COLOR) {
     return DEFAULT_TOKENS;
   }
 
-  // Keep the user's hue/saturation; only pull lightness into a range that's
-  // legible against a white (light mode) or near-black (dark mode) page.
-  const lightPrimary = clampLightness(hex, 38, 55);
-  const darkPrimary = clampLightness(hex, 55, 72);
+  // Keep the user's hue/saturation throughout; only lightness moves, into
+  // three ranges matched to the redesign's own tint/foreground/ring recipe
+  // (see e.g. --warm-sage/--warm-sky/--warm-peach in globals.css, which are
+  // this exact same shape hand-picked for specific hues).
+  const lightTint = clampLightness(hex, 86, 92);
+  const lightRing = clampLightness(hex, 55, 68);
+  const darkTint = clampLightness(hex, 16, 22);
+  const darkRing = clampLightness(hex, 55, 68);
 
   return {
     light: {
-      primary: lightPrimary,
-      foreground: foregroundFor(lightPrimary),
-      ring: nudgeLightness(lightPrimary, 8),
+      tint: lightTint,
+      tintForeground: clampLightness(hex, 28, 38),
+      ring: lightRing,
     },
     dark: {
-      primary: darkPrimary,
-      foreground: foregroundFor(darkPrimary),
-      ring: nudgeLightness(darkPrimary, 8),
+      tint: darkTint,
+      tintForeground: clampLightness(hex, 70, 82),
+      ring: darkRing,
     },
   };
 }
+
+export { foregroundFor };

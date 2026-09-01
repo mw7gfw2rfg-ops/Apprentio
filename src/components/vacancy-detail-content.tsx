@@ -66,7 +66,7 @@ export function VacancyDetailContent({
     <div className="flex flex-col gap-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{vacancy.role_title}</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-tight">{vacancy.role_title}</h1>
           <p className="mt-1 text-base text-muted-foreground">{vacancy.employer_name}</p>
           <a
             href={`https://higherin.com/search-companies?search-term=${encodeURIComponent(vacancy.employer_name)}`}
@@ -106,7 +106,7 @@ export function VacancyDetailContent({
       </div>
 
       {hasCv && matchScore && (
-        <div className="rounded-xl border p-4">
+        <div className="rounded-2xl border border-[var(--warm-sage-border)] bg-[var(--warm-sage)]/40 p-4">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Match with your CV
@@ -130,7 +130,7 @@ export function VacancyDetailContent({
       )}
 
       {!hasCv && (
-        <div className="rounded-xl border border-dashed p-4">
+        <div className="rounded-2xl border border-dashed p-4">
           <p className="text-sm text-muted-foreground">
             <Link href="/onboarding" className="underline">
               Upload your base CV
@@ -141,7 +141,7 @@ export function VacancyDetailContent({
       )}
 
       {employerResearch?.found && (
-        <div className="rounded-xl border bg-primary/5 p-4">
+        <div className="rounded-2xl border border-[var(--warm-sky-border)] bg-[var(--warm-sky)]/40 p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             About this employer
           </h2>
@@ -177,7 +177,7 @@ export function VacancyDetailContent({
       )}
 
       {faa && (
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-4 rounded-xl border p-4 sm:grid-cols-3">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-4 rounded-2xl border p-4 sm:grid-cols-3">
           {faa.wage?.wageAdditionalInformation && (
             <Fact label="Wage" value={faa.wage.wageAdditionalInformation} />
           )}

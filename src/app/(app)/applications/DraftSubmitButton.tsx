@@ -25,7 +25,7 @@ export function DraftSubmitButton() {
     return (
       <button
         type="submit"
-        className="rounded-lg border border-neutral-200 px-3.5 py-2 text-sm font-medium text-neutral-800 transition-all hover:border-neutral-300 hover:bg-neutral-50 active:scale-[0.97] dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-900"
+        className="rounded-xl border border-border px-4 py-2 text-sm font-bold transition-colors hover:bg-accent active:translate-y-px"
       >
         Draft
       </button>
@@ -51,10 +51,10 @@ function DraftingProgress() {
   }, []);
 
   return (
-    <div className="glow-pulse flex w-full max-w-xs flex-col gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3.5 py-3">
-      <div className="h-1 w-full overflow-hidden rounded-full bg-primary/15">
+    <div className="glow-pulse flex w-full max-w-xs flex-col gap-2 rounded-2xl border border-[var(--warm-sky-border)] bg-[var(--warm-sky)]/50 px-4 py-3">
+      <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--warm-sky-border)]">
         <motion.div
-          className="h-full rounded-full bg-primary"
+          className="h-full rounded-full bg-[var(--warm-sky-foreground)]"
           initial={{ width: "4%" }}
           animate={{ width: "92%" }}
           transition={
@@ -71,7 +71,7 @@ function DraftingProgress() {
           animate={{ opacity: 1, y: 0 }}
           exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
           transition={{ duration: 0.2 }}
-          className="text-xs font-medium text-primary"
+          className="text-xs font-bold text-[var(--warm-sky-foreground)]"
         >
           {STEPS[stepIndex]}…
         </motion.p>

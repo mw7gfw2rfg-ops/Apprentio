@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,91 +39,155 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
+  /* Warm, "hand-drawn" accent colors used contextually (badges, icons,
+     button shadows) throughout the redesign -- not a single accent hue, a
+     small warm palette. Kept as first-class tokens (not one-off hex in
+     components) so every page draws from the same named set. */
+  --color-warm-sage: var(--warm-sage);
+  --color-warm-sage-foreground: var(--warm-sage-foreground);
+  --color-warm-sage-border: var(--warm-sage-border);
+  --color-warm-sky: var(--warm-sky);
+  --color-warm-sky-foreground: var(--warm-sky-foreground);
+  --color-warm-sky-border: var(--warm-sky-border);
+  --color-warm-peach: var(--warm-peach);
+  --color-warm-peach-foreground: var(--warm-peach-foreground);
+  --color-warm-peach-border: var(--warm-peach-border);
+  --color-warm-tan: var(--warm-tan);
+  --color-warm-tan-foreground: var(--warm-tan-foreground);
+  --color-warm-tan-border: var(--warm-tan-border);
+  --color-shadow-accent: var(--shadow-accent);
+  --radius-sm: calc(var(--radius) * 0.55);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-xl: calc(var(--radius) * 1.5);
+  --radius-2xl: calc(var(--radius) * 2);
+  --radius-3xl: calc(var(--radius) * 2.4);
+  --radius-4xl: calc(var(--radius) * 2.8);
 }
 
 body {
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --font-sans: var(--font-geist-sans);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* Indigo-600 — the accent established in the Discovery/Board/auth passes */
-  --primary: oklch(51.1% 0.262 276.966);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(58.5% 0.233 277.117);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  /* Active nav item — the one place indigo marks "you are here" */
-  --sidebar-primary: oklch(51.1% 0.262 276.966);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(58.5% 0.233 277.117);
+  --font-sans: var(--font-nunito);
+  /* Shantell Sans is used for headings/display text only -- Nunito
+     (--font-sans) remains the body copy face, matching the source design's
+     own pairing (see UI_REDESIGN_BRIEF.md). */
+  --font-heading: var(--font-shantell-sans);
+
+  /* Warm cream/charcoal palette from the redesign (see
+     "Apprentio Site.dc.html" / "Apprentio App.dc.html"). */
+  --background: #faf6ef;
+  --foreground: #2e2a26;
+  --card: #fffdf9;
+  --card-foreground: #2e2a26;
+  --popover: #fffdf9;
+  --popover-foreground: #2e2a26;
+  /* Primary button fill is the dark charcoal itself in this design (paired
+     with a terracotta drop-shadow, see --shadow-accent) -- not a saturated
+     brand hue. */
+  --primary: #2e2a26;
+  --primary-foreground: #faf6ef;
+  --secondary: #f1eadc;
+  --secondary-foreground: #2e2a26;
+  --muted: #f1eadc;
+  --muted-foreground: #7b7062;
+  --accent: #f1eadc;
+  --accent-foreground: #2e2a26;
+  --destructive: #b4653f;
+  --border: #e6dccc;
+  --input: #e0d5c2;
+  --ring: #7fb8a0;
+  --link: #b4653f;
+  --chart-1: #6fa3c7;
+  --chart-2: #d98e63;
+  --chart-3: #6fa383;
+  --chart-4: #b79acb;
+  --chart-5: #e0b24c;
+  --radius: 0.875rem;
+
+  --sidebar: #fffdf9;
+  --sidebar-foreground: #2e2a26;
+  --sidebar-primary: #efe8dc;
+  --sidebar-primary-foreground: #2e2a26;
+  --sidebar-accent: #efe8dc;
+  --sidebar-accent-foreground: #2e2a26;
+  --sidebar-border: #e6dccc;
+  --sidebar-ring: #7fb8a0;
+
+  --warm-sage: #dcede4;
+  --warm-sage-foreground: #35604d;
+  --warm-sage-border: #b5d6c6;
+  --warm-sky: #d6e7f5;
+  --warm-sky-foreground: #3b6285;
+  --warm-sky-border: #b7d2e9;
+  --warm-peach: #fbe3d4;
+  --warm-peach-foreground: #8e4a2b;
+  --warm-peach-border: #efc7ae;
+  --warm-tan: #f1eadc;
+  --warm-tan-foreground: #6b6053;
+  --warm-tan-border: #e0d5c2;
+  --shadow-accent: #edb294;
 }
 
 .dark {
-  --font-sans: var(--font-geist-sans);
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  /* Indigo-500 — one step lighter than light mode for contrast on dark bg */
-  --primary: oklch(58.5% 0.233 277.117);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(67.3% 0.182 276.935);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(58.5% 0.233 277.117);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(67.3% 0.182 276.935);
+  --font-sans: var(--font-nunito);
+  --font-heading: var(--font-shantell-sans);
+
+  /* No dark variant existed in the source redesign -- this extrapolates the
+     same warm palette (never cold blue-black) rather than dropping dark
+     mode, which is a real, tested, existing feature. */
+  --background: #201b16;
+  --foreground: #f3ede2;
+  --card: #29231d;
+  --card-foreground: #f3ede2;
+  --popover: #29231d;
+  --popover-foreground: #f3ede2;
+  /* Button fill flips light-on-dark here, same convention the previous
+     indigo theme used (primary gets lighter, not darker, in dark mode so it
+     still pops against the background). */
+  --primary: #f3ede2;
+  --primary-foreground: #241f19;
+  --secondary: #332b23;
+  --secondary-foreground: #f3ede2;
+  --muted: #332b23;
+  --muted-foreground: #b8ac9c;
+  --accent: #332b23;
+  --accent-foreground: #f3ede2;
+  --destructive: #e0916a;
+  --border: rgba(243, 237, 226, 0.14);
+  --input: rgba(243, 237, 226, 0.18);
+  --ring: #8fcbb0;
+  --link: #e0916a;
+  --chart-1: #6fa3c7;
+  --chart-2: #d98e63;
+  --chart-3: #6fa383;
+  --chart-4: #b79acb;
+  --chart-5: #e0b24c;
+
+  --sidebar: #241f19;
+  --sidebar-foreground: #f3ede2;
+  --sidebar-primary: #3a322a;
+  --sidebar-primary-foreground: #f3ede2;
+  --sidebar-accent: #3a322a;
+  --sidebar-accent-foreground: #f3ede2;
+  --sidebar-border: rgba(243, 237, 226, 0.14);
+  --sidebar-ring: #8fcbb0;
+
+  --warm-sage: #24352c;
+  --warm-sage-foreground: #9fd6bc;
+  --warm-sage-border: #3a5346;
+  --warm-sky: #22333f;
+  --warm-sky-foreground: #a9cbe6;
+  --warm-sky-border: #3a4f5f;
+  --warm-peach: #3a2c23;
+  --warm-peach-foreground: #f0b48c;
+  --warm-peach-border: #563f30;
+  --warm-tan: #332b23;
+  --warm-tan-foreground: #cabda9;
+  --warm-tan-border: #4a4033;
+  --shadow-accent: #6b4a34;
 }
 
 @layer base {
@@ -136,6 +200,12 @@ body {
   html {
     @apply font-sans;
   }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+  }
 }
 
 /* Restrained accent-colored glow for elements representing a genuinely
@@ -144,7 +214,7 @@ body {
    asked for reduced motion, so "respect prefers-reduced-motion" means
    dropping the motion, not the glow itself. */
 .glow-pulse {
-  box-shadow: 0 0 10px 0 color-mix(in oklch, var(--primary) 25%, transparent);
+  box-shadow: 0 0 10px 0 color-mix(in oklch, var(--shadow-accent) 30%, transparent);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -156,10 +226,10 @@ body {
 @keyframes glow-pulse {
   0%,
   100% {
-    box-shadow: 0 0 10px 0 color-mix(in oklch, var(--primary) 20%, transparent);
+    box-shadow: 0 0 10px 0 color-mix(in oklch, var(--shadow-accent) 25%, transparent);
   }
   50% {
-    box-shadow: 0 0 22px 2px color-mix(in oklch, var(--primary) 45%, transparent);
+    box-shadow: 0 0 22px 2px color-mix(in oklch, var(--shadow-accent) 50%, transparent);
   }
 }
 
@@ -184,5 +254,46 @@ body {
   }
   100% {
     transform: translateX(400%);
+  }
+}
+
+/* Gentle floating drift for the landing-page hero cards -- see
+   AnimatedPage.tsx / the redesign brief for the reduced-motion rule this
+   respects (applied via a `motion-safe:` variant at each call site, not
+   here, since Tailwind's utility already gates on prefers-reduced-motion). */
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--float-r, 0deg));
+  }
+  50% {
+    transform: translateY(-9px) rotate(var(--float-r, 0deg));
+  }
+}
+
+/* Hand-drawn underline stroke-draw-on animation (hero heading doodle). */
+@keyframes dash-draw {
+  from {
+    stroke-dashoffset: 220;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Subtle film-grain texture overlay used behind the marketing pages. */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .grain-overlay {
+    display: none;
   }
 }

@@ -9,16 +9,25 @@ export const ALLOWED_STATUS_TRANSITIONS: Record<string, readonly string[]> = {
   interview: ["offer", "rejected", "withdrawn"],
 };
 
+// Semantic status colors, deliberately distinct from the user's chosen
+// accent -- they map 1:1 onto the redesign's own chart-1..5 tokens (see
+// globals.css) so a "warm" palette pass didn't have to invent new hues.
+const NEUTRAL_DOT = "bg-[var(--warm-tan-border)]";
+const AMBER_DOT = "bg-chart-5";
+const PRIMARY_DOT = "bg-chart-1";
+const VIOLET_DOT = "bg-chart-2";
+const EMERALD_DOT = "bg-chart-3";
+
 export const STAGES = [
-  { key: "saved", label: "Saved", dot: "bg-neutral-400 dark:bg-neutral-600" },
-  { key: "drafting", label: "Drafting", dot: "bg-neutral-400 dark:bg-neutral-600" },
-  { key: "ready_for_review", label: "Ready for review", dot: "bg-amber-500 dark:bg-amber-400" },
-  { key: "approved", label: "Approved", dot: "bg-primary" },
-  { key: "submitted", label: "Submitted", dot: "bg-primary" },
-  { key: "interview", label: "Interview", dot: "bg-violet-500 dark:bg-violet-400" },
-  { key: "offer", label: "Offer", dot: "bg-emerald-500 dark:bg-emerald-400" },
-  { key: "rejected", label: "Rejected", dot: "bg-neutral-400 dark:bg-neutral-600" },
-  { key: "withdrawn", label: "Withdrawn", dot: "bg-neutral-400 dark:bg-neutral-600" },
+  { key: "saved", label: "Saved", dot: NEUTRAL_DOT },
+  { key: "drafting", label: "Drafting", dot: NEUTRAL_DOT },
+  { key: "ready_for_review", label: "Ready for review", dot: AMBER_DOT },
+  { key: "approved", label: "Approved", dot: PRIMARY_DOT },
+  { key: "submitted", label: "Submitted", dot: PRIMARY_DOT },
+  { key: "interview", label: "Interview", dot: VIOLET_DOT },
+  { key: "offer", label: "Offer", dot: EMERALD_DOT },
+  { key: "rejected", label: "Rejected", dot: NEUTRAL_DOT },
+  { key: "withdrawn", label: "Withdrawn", dot: NEUTRAL_DOT },
 ] as const;
 
 export const STAGE_LABELS: Record<string, string> = Object.fromEntries(
@@ -38,20 +47,20 @@ export const STAGE_DOTS: Record<string, string> = Object.fromEntries(
 // terminal, post-submission outcomes) -- a card in either still shows its
 // real specific stage as a badge, so no information is lost.
 export const BOARD_COLUMNS = [
-  { key: "saved", label: "Saved", dot: "bg-neutral-400 dark:bg-neutral-600", stages: ["saved"] },
+  { key: "saved", label: "Saved", dot: NEUTRAL_DOT, stages: ["saved"] },
   {
     key: "in_progress",
     label: "In progress",
-    dot: "bg-amber-500 dark:bg-amber-400",
+    dot: AMBER_DOT,
     stages: ["drafting", "ready_for_review"],
   },
-  { key: "approved", label: "Approved", dot: "bg-primary", stages: ["approved"] },
-  { key: "submitted", label: "Submitted", dot: "bg-primary", stages: ["submitted"] },
-  { key: "interview", label: "Interview", dot: "bg-violet-500 dark:bg-violet-400", stages: ["interview"] },
+  { key: "approved", label: "Approved", dot: PRIMARY_DOT, stages: ["approved"] },
+  { key: "submitted", label: "Submitted", dot: PRIMARY_DOT, stages: ["submitted"] },
+  { key: "interview", label: "Interview", dot: VIOLET_DOT, stages: ["interview"] },
   {
     key: "closed",
     label: "Closed",
-    dot: "bg-neutral-400 dark:bg-neutral-600",
+    dot: NEUTRAL_DOT,
     stages: ["offer", "rejected", "withdrawn"],
   },
 ] as const;

@@ -15,20 +15,28 @@ export function AccentStyle({ accentColor }: { accentColor: string }) {
 
   const css = `
 :root {
-  --primary: ${light.primary};
-  --primary-foreground: ${light.foreground};
   --ring: ${light.ring};
-  --sidebar-primary: ${light.primary};
-  --sidebar-primary-foreground: ${light.foreground};
+  --shadow-accent: ${light.ring};
+  --sidebar-primary: ${light.tint};
+  --sidebar-primary-foreground: ${light.tintForeground};
+  --sidebar-accent: ${light.tint};
+  --sidebar-accent-foreground: ${light.tintForeground};
   --sidebar-ring: ${light.ring};
+  --warm-sage: ${light.tint};
+  --warm-sage-foreground: ${light.tintForeground};
+  --warm-sage-border: ${light.ring};
 }
 .dark {
-  --primary: ${dark.primary};
-  --primary-foreground: ${dark.foreground};
   --ring: ${dark.ring};
-  --sidebar-primary: ${dark.primary};
-  --sidebar-primary-foreground: ${dark.foreground};
+  --shadow-accent: ${dark.ring};
+  --sidebar-primary: ${dark.tint};
+  --sidebar-primary-foreground: ${dark.tintForeground};
+  --sidebar-accent: ${dark.tint};
+  --sidebar-accent-foreground: ${dark.tintForeground};
   --sidebar-ring: ${dark.ring};
+  --warm-sage: ${dark.tint};
+  --warm-sage-foreground: ${dark.tintForeground};
+  --warm-sage-border: ${dark.ring};
 }`;
 
   // Safe: css is built entirely from numbers computeAccentTokens derived

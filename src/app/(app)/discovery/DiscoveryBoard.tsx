@@ -88,7 +88,7 @@ export function DiscoveryBoard({
                   e.preventDefault();
                   handleSelect(vacancy.id);
                 }}
-                className={`block rounded-xl border p-3 pr-20 text-sm transition-colors ${
+                className={`block rounded-2xl border p-3.5 pr-20 text-sm shadow-[0_12px_22px_-18px_rgba(96,74,52,0.5)] transition-all hover:-translate-y-0.5 ${
                   isActive
                     ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
                     : "border-border bg-card hover:border-primary/40"
@@ -132,7 +132,7 @@ export function DiscoveryBoard({
       </ul>
 
       {isDesktop && (
-        <div className="sticky top-[4.5rem] hidden max-h-[calc(100vh-6rem)] overflow-y-auto rounded-xl border bg-card p-6 lg:block">
+        <div className="sticky top-[4.5rem] hidden max-h-[calc(100vh-6rem)] overflow-y-auto rounded-[24px_20px_26px_22px] border bg-card p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_30px_50px_-30px_rgba(96,74,52,0.5)] lg:block">
           {!effectiveSelectedId && (
             <p className="text-sm text-muted-foreground">
               Select a vacancy from the list to see full details here.
