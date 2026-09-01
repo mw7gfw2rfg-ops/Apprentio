@@ -25,22 +25,20 @@ export function AccentColorPicker({
           value={valid ? hexInput : initialColor}
           onChange={(e) => setHexInput(e.target.value)}
           aria-label="Accent color"
-          className="h-10 w-14 cursor-pointer rounded-md border border-neutral-200 bg-transparent p-1 dark:border-neutral-700"
+          className="h-10 w-14 cursor-pointer rounded-xl border-2 border-border bg-transparent p-1"
         />
         <input
           type="text"
           value={hexInput}
           onChange={(e) => setHexInput(e.target.value)}
-          placeholder="#4f46e5"
+          placeholder="#7fb8a0"
           maxLength={7}
           spellCheck={false}
           aria-label="Accent color hex value"
-          className="w-28 rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm font-mono outline-none focus-visible:border-indigo-500 focus-visible:ring-4 focus-visible:ring-indigo-500/10 dark:border-neutral-700 dark:bg-neutral-900 dark:focus-visible:border-indigo-400"
+          className="w-28 rounded-xl border-2 border-border bg-background px-3 py-2 text-sm font-mono text-foreground outline-none focus-visible:border-ring"
         />
         {!valid && (
-          <span className="text-xs text-red-600 dark:text-red-400">
-            Enter a 6-digit hex color
-          </span>
+          <span className="text-xs text-destructive">Enter a 6-digit hex color</span>
         )}
       </div>
 
@@ -56,15 +54,15 @@ export function AccentColorPicker({
           type="submit"
           formAction={updateAccentColor}
           disabled={!valid}
-          className="self-start rounded-lg px-4 py-2 text-sm font-medium text-white transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
-          style={valid ? { backgroundColor: hexInput } : undefined}
+          className="self-start rounded-xl px-5 py-2.5 text-sm font-bold transition-transform hover:-translate-y-0.5 active:translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
+          style={valid ? { backgroundColor: "#2E2A26", color: "#FAF6EF", boxShadow: `0 3px 0 ${hexInput}` } : undefined}
         >
           Save accent color
         </button>
         <button
           type="submit"
           formAction={resetAccentColor}
-          className="self-start rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium transition-all hover:bg-neutral-50 active:scale-[0.98] dark:border-neutral-700 dark:hover:bg-neutral-900"
+          className="self-start rounded-xl border-2 border-border px-5 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-accent"
         >
           Reset to default
         </button>
@@ -86,16 +84,16 @@ function PreviewSwatch({
     <div
       className={
         dark
-          ? "flex flex-col gap-2 rounded-lg border border-neutral-800 bg-neutral-950 p-3"
-          : "flex flex-col gap-2 rounded-lg border border-neutral-200 bg-white p-3"
+          ? "flex flex-col gap-2 rounded-2xl border-2 border-[#4a4033] bg-[#241f19] p-3"
+          : "flex flex-col gap-2 rounded-2xl border-2 border-border bg-card p-3"
       }
     >
-      <span className={dark ? "text-xs text-neutral-400" : "text-xs text-neutral-500"}>
+      <span className={dark ? "text-xs text-[#cabda9]" : "text-xs text-muted-foreground"}>
         {label}
       </span>
       <span
-        className="flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium"
-        style={{ backgroundColor: tokens.primary, color: tokens.foreground }}
+        className="flex h-9 items-center justify-center rounded-full px-4 text-sm font-bold"
+        style={{ backgroundColor: tokens.tint, color: tokens.tintForeground }}
       >
         Preview
       </span>
