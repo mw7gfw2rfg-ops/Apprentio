@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { AnimatedPage } from "@/components/AnimatedPage";
+import { AuthCard, AuthBanner } from "@/components/auth-card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { resetPassword } from "../login/actions";
 
@@ -27,58 +29,30 @@ export default async function ResetPasswordPage({
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 py-16">
-      <AnimatedPage className="flex w-full max-w-sm flex-col gap-8">
-        <Link
-          href="/"
-          className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100"
-        >
-          Apprentio
-        </Link>
+    <AuthCard title="Set a new password" subtitle={`Choose a new password for ${user.email}.`}>
+      {error && <AuthBanner tone="error">{error}</AuthBanner>}
 
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Set a new password</h1>
-          <p className="mt-1.5 text-sm text-neutral-500 dark:text-neutral-400">
-            Choose a new password for {user.email}.
-          </p>
+      <form className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="password">New password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            aria-describedby="password-hint"
+            className="h-11 rounded-2xl px-4 text-base"
+          />
+          <span id="password-hint" className="text-xs text-muted-foreground/70">
+            At least 8 characters.
+          </span>
         </div>
-
-        {error && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
-            {error}
-          </p>
-        )}
-
-        <form className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5 text-sm">
-            <label
-              htmlFor="password"
-              className="font-medium text-neutral-700 dark:text-neutral-300"
-            >
-              New password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              autoComplete="new-password"
-              aria-describedby="password-hint"
-              className="rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-neutral-800 dark:bg-neutral-900 dark:focus:border-indigo-400"
-            />
-            <span id="password-hint" className="text-xs text-neutral-400 dark:text-neutral-600">
-              At least 8 characters.
-            </span>
-          </div>
-          <button
-            formAction={resetPassword}
-            className="mt-2 w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-indigo-500 active:scale-[0.98] dark:bg-indigo-500 dark:hover:bg-indigo-400"
-          >
-            Update password
-          </button>
-        </form>
-      </AnimatedPage>
-    </main>
+        <Button formAction={resetPassword} size="lg" className="mt-2">
+          Update password
+        </Button>
+      </form>
+    </AuthCard>
   );
 }
