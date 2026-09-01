@@ -72,10 +72,10 @@ export function AppSidebar({
               size="lg"
               render={<Link href="/dashboard" onClick={closeMobile} />}
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-[12px_10px_13px_9px] bg-foreground text-background">
                 <Logo className="size-5" />
               </div>
-              <span className="text-base font-semibold tracking-tight">Apprentio</span>
+              <span className="font-heading text-base font-bold tracking-tight">Apprentio</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
