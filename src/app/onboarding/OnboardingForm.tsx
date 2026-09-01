@@ -25,12 +25,11 @@ type Props = {
 };
 
 const inputClass =
-  "rounded-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:border-neutral-800 dark:bg-neutral-900 dark:focus:border-indigo-400";
+  "rounded-2xl border-2 border-input bg-background px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors focus:border-ring";
 const ghostButtonClass =
-  "rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600 transition-all hover:border-neutral-300 hover:bg-neutral-50 active:scale-[0.97] dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-900";
-const legendClass =
-  "mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400";
-const fieldLabelClass = "font-medium text-neutral-700 dark:text-neutral-300";
+  "rounded-xl border border-border px-3 py-1.5 text-xs font-bold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:translate-y-px";
+const legendClass = "mb-2 font-heading text-base font-bold text-foreground";
+const fieldLabelClass = "font-bold text-foreground";
 
 export default function OnboardingForm({
   initialFullName,
@@ -90,7 +89,7 @@ export default function OnboardingForm({
       <input type="hidden" name="predicted_grades_json" value={predictedGradesJson} />
 
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">
           {error}
         </p>
       )}
@@ -132,7 +131,7 @@ export default function OnboardingForm({
               className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end"
             >
               <label className="flex flex-col gap-1 text-xs">
-                <span className="text-neutral-500 dark:text-neutral-400">Subject</span>
+                <span className="text-muted-foreground">Subject</span>
                 <input
                   className={inputClass}
                   value={row.subject}
@@ -141,7 +140,7 @@ export default function OnboardingForm({
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs">
-                <span className="text-neutral-500 dark:text-neutral-400">
+                <span className="text-muted-foreground">
                   Predicted grade
                 </span>
                 <select
@@ -160,7 +159,7 @@ export default function OnboardingForm({
                 </select>
               </label>
               <label className="flex flex-col gap-1 text-xs">
-                <span className="text-neutral-500 dark:text-neutral-400">
+                <span className="text-muted-foreground">
                   Actual grade (if sat)
                 </span>
                 <select
@@ -203,7 +202,7 @@ export default function OnboardingForm({
                 name="sectors"
                 value={sector}
                 defaultChecked={initialSectors.includes(sector)}
-                className="h-4 w-4 accent-indigo-600"
+                className="h-4 w-4 accent-[var(--warm-sage-foreground)]"
               />
               {sector}
             </label>
@@ -270,7 +269,7 @@ export default function OnboardingForm({
               value="yes"
               defaultChecked={initialRightToWork === true}
               required
-              className="h-4 w-4 accent-indigo-600"
+              className="h-4 w-4 accent-[var(--warm-sage-foreground)]"
             />
             Yes
           </label>
@@ -280,7 +279,7 @@ export default function OnboardingForm({
               name="right_to_work"
               value="no"
               defaultChecked={initialRightToWork === false}
-              className="h-4 w-4 accent-indigo-600"
+              className="h-4 w-4 accent-[var(--warm-sage-foreground)]"
             />
             No
           </label>
@@ -296,7 +295,7 @@ export default function OnboardingForm({
               name="security_clearance_eligible"
               value="yes"
               defaultChecked={initialSecurityClearanceEligible === true}
-              className="h-4 w-4 accent-indigo-600"
+              className="h-4 w-4 accent-[var(--warm-sage-foreground)]"
             />
             Yes
           </label>
@@ -306,7 +305,7 @@ export default function OnboardingForm({
               name="security_clearance_eligible"
               value="no"
               defaultChecked={initialSecurityClearanceEligible === false}
-              className="h-4 w-4 accent-indigo-600"
+              className="h-4 w-4 accent-[var(--warm-sage-foreground)]"
             />
             No
           </label>
@@ -319,7 +318,7 @@ export default function OnboardingForm({
                 initialSecurityClearanceEligible === null ||
                 initialSecurityClearanceEligible === undefined
               }
-              className="h-4 w-4 accent-indigo-600"
+              className="h-4 w-4 accent-[var(--warm-sage-foreground)]"
             />
             Not sure
           </label>
@@ -327,8 +326,9 @@ export default function OnboardingForm({
       </fieldset>
 
       <button
+        type="submit"
         formAction={saveOnboarding}
-        className="self-start rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-indigo-500 active:scale-[0.98] dark:bg-indigo-500 dark:hover:bg-indigo-400"
+        className="self-start rounded-2xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground shadow-[0_4px_0_var(--shadow-accent)] transition-transform hover:-translate-y-0.5 active:translate-y-0.5"
       >
         Save & continue
       </button>

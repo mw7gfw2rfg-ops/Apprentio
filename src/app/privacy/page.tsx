@@ -2,20 +2,20 @@ import Link from "next/link";
 
 export const metadata = { title: "Privacy Policy — Apprentio" };
 
-const h2 = "mt-8 text-lg font-semibold";
-const p = "mt-2 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300";
-const li = "mt-1 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300";
+const h2 = "mt-8 font-heading text-lg font-bold";
+const p = "mt-2 text-sm leading-relaxed text-foreground/80";
+const li = "mt-1 text-sm leading-relaxed text-foreground/80";
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-16">
-      <div className="rounded border border-amber-400 bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+    <main className="mx-auto max-w-2xl bg-background px-4 py-16">
+      <div className="rounded-2xl border-2 border-[#EBD59A] bg-[#FBF0D8] p-4 text-sm text-[#6E5A20] shadow-[0_18px_30px_-24px_rgba(150,120,40,0.9)]">
         <strong>Draft — not legally reviewed.</strong> This is a first draft written to
         describe what the app actually does. It has not been checked by a solicitor and
         must not be relied on as a finished policy while real users&apos; data is involved.
       </div>
 
-      <h1 className="mt-8 text-2xl font-semibold">Privacy Policy</h1>
+      <h1 className="mt-8 font-heading text-3xl font-bold tracking-tight">Privacy Policy</h1>
       <p className={p}>Last updated: 6 August 2026.</p>
 
       <h2 className={h2}>Who we are</h2>
@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
         Apprentio is a small, independently-run product for UK sixth-form students
         applying to degree apprenticeships, operated by Archie Richardson. For anything
         about your data, contact{" "}
-        <a className="underline" href="mailto:richardson.archie@yahoo.com">
+        <a className="font-bold text-[var(--link)] hover:underline" href="mailto:richardson.archie@yahoo.com">
           richardson.archie@yahoo.com
         </a>
         .
@@ -97,7 +97,7 @@ export default function PrivacyPolicyPage() {
         For as long as your account is active. If you delete your account, your profile,
         uploaded documents, saved applications, and drafted content are deleted, and any
         active subscription is cancelled — see{" "}
-        <Link href="/account/delete" className="underline">
+        <Link href="/account/delete" className="font-bold text-[var(--link)] hover:underline">
           Delete my account
         </Link>
         . Stripe retains payment/invoice records separately, as required for their own
@@ -116,7 +116,7 @@ export default function PrivacyPolicyPage() {
         </li>
         <li className={li}>
           <strong>Delete</strong> your account and data — use{" "}
-          <Link href="/account/delete" className="underline">
+          <Link href="/account/delete" className="font-bold text-[var(--link)] hover:underline">
             Delete my account
           </Link>{" "}
           for a full, immediate purge, or email us.

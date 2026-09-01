@@ -2,20 +2,20 @@ import Link from "next/link";
 
 export const metadata = { title: "Terms of Service — Apprentio" };
 
-const h2 = "mt-8 text-lg font-semibold";
-const p = "mt-2 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300";
+const h2 = "mt-8 font-heading text-lg font-bold";
+const p = "mt-2 text-sm leading-relaxed text-foreground/80";
 
 export default function TermsOfServicePage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-16">
-      <div className="rounded border border-amber-400 bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+    <main className="mx-auto max-w-2xl bg-background px-4 py-16">
+      <div className="rounded-2xl border-2 border-[#EBD59A] bg-[#FBF0D8] p-4 text-sm text-[#6E5A20] shadow-[0_18px_30px_-24px_rgba(150,120,40,0.9)]">
         <strong>Draft — not legally reviewed.</strong> This is a first draft written to
         describe what the app actually does. It has not been checked by a solicitor and
         must not be relied on as a finished agreement while real users&apos; data is
         involved.
       </div>
 
-      <h1 className="mt-8 text-2xl font-semibold">Terms of Service</h1>
+      <h1 className="mt-8 font-heading text-3xl font-bold tracking-tight">Terms of Service</h1>
       <p className={p}>Last updated: 6 August 2026.</p>
 
       <h2 className={h2}>What Apprentio is</h2>
@@ -40,7 +40,7 @@ export default function TermsOfServicePage() {
         accuracy of what you enter — including right-to-work and security clearance
         eligibility, which we don&apos;t independently verify. You must be old enough to
         legally consent to this agreement in your own right (see our{" "}
-        <Link href="/privacy" className="underline">
+        <Link href="/privacy" className="font-bold text-[var(--link)] hover:underline">
           Privacy Policy
         </Link>
         ).
@@ -81,7 +81,7 @@ export default function TermsOfServicePage() {
       <h2 className={h2}>Ending your account</h2>
       <p className={p}>
         You can delete your account at any time — see{" "}
-        <Link href="/account/delete" className="underline">
+        <Link href="/account/delete" className="font-bold text-[var(--link)] hover:underline">
           Delete my account
         </Link>
         . This permanently removes your profile, uploaded documents, saved applications,
@@ -105,7 +105,7 @@ export default function TermsOfServicePage() {
 
       <h2 className={h2}>Contact</h2>
       <p className={p}>
-        <a className="underline" href="mailto:richardson.archie@yahoo.com">
+        <a className="font-bold text-[var(--link)] hover:underline" href="mailto:richardson.archie@yahoo.com">
           richardson.archie@yahoo.com
         </a>
       </p>

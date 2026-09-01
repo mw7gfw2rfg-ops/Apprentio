@@ -17,7 +17,7 @@ type EmployerSource = {
   last_verified_at: string | null;
 };
 
-const inputClass = "rounded border px-2 py-1 text-sm";
+const inputClass = "rounded-lg border border-border bg-background px-2 py-1 text-sm text-foreground";
 
 export default async function AdminPage({
   searchParams,
@@ -41,17 +41,17 @@ export default async function AdminPage({
     .returns<EmployerSource[]>();
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-10 px-4 py-16">
+    <main className="mx-auto flex max-w-4xl flex-col gap-10 px-4 py-10">
       <div>
-        <h1 className="text-2xl font-semibold">Admin</h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">employer_sources and curated vacancies.</p>
+        <h1 className="font-heading text-2xl font-bold">Admin</h1>
+        <p className="text-sm text-muted-foreground">employer_sources and curated vacancies.</p>
       </div>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-      {success && <p className="text-sm text-green-600 dark:text-green-400">{success}</p>}
+      {error && <p className="text-sm font-semibold text-destructive">{error}</p>}
+      {success && <p className="text-sm font-semibold text-[var(--warm-sage-foreground)]">{success}</p>}
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-medium">Employers ({employers?.length ?? 0})</h2>
+        <h2 className="font-heading text-lg font-bold">Employers ({employers?.length ?? 0})</h2>
         <div className="flex flex-col gap-3">
           {(employers ?? []).map((employer) => (
             <form
@@ -105,7 +105,7 @@ export default async function AdminPage({
                 <span>
                   Last verified{" "}
                   {employer.last_verified_at && (
-                    <span className="text-xs text-neutral-400 dark:text-neutral-500">
+                    <span className="text-xs text-muted-foreground">
                       ({new Date(employer.last_verified_at).toLocaleDateString()})
                     </span>
                   )}
@@ -121,8 +121,9 @@ export default async function AdminPage({
                 />
               </label>
               <button
+                type="submit"
                 formAction={updateEmployerSource}
-                className="self-start rounded border px-3 py-1.5 text-sm transition-transform active:scale-[0.97] sm:col-span-2"
+                className="self-start rounded-lg border border-border px-3.5 py-1.5 text-sm font-bold transition-transform hover:bg-accent active:translate-y-px sm:col-span-2"
               >
                 Save
               </button>
@@ -132,7 +133,7 @@ export default async function AdminPage({
       </section>
 
       <section className="flex flex-col gap-3 border-t pt-6">
-        <h2 className="text-lg font-medium">Add employer</h2>
+        <h2 className="font-heading text-lg font-bold">Add employer</h2>
         <form className="grid grid-cols-1 gap-2 rounded border p-3 text-sm sm:grid-cols-2">
           <label className="flex flex-col gap-1">
             Name
@@ -162,8 +163,9 @@ export default async function AdminPage({
             <textarea name="notes" rows={2} className={inputClass} />
           </label>
           <button
+            type="submit"
             formAction={addEmployerSource}
-            className="self-start rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97] dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 sm:col-span-2"
+            className="self-start rounded-lg bg-primary px-3.5 py-1.5 text-sm font-bold text-primary-foreground shadow-[0_3px_0_var(--shadow-accent)] transition-transform active:translate-y-px sm:col-span-2"
           >
             Add employer
           </button>
@@ -171,8 +173,8 @@ export default async function AdminPage({
       </section>
 
       <section className="flex flex-col gap-3 border-t pt-6">
-        <h2 className="text-lg font-medium">Add curated vacancy</h2>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+        <h2 className="font-heading text-lg font-bold">Add curated vacancy</h2>
+        <p className="text-sm text-muted-foreground">
           For employers who post directly rather than via the Find an Apprenticeship API
           — e.g. GCHQ once its window opens.
         </p>
@@ -212,7 +214,7 @@ export default async function AdminPage({
           <label className="flex flex-col gap-1">
             Start date
             <input name="start_date" type="date" className={inputClass} />
-            <span className="text-xs text-neutral-400 dark:text-neutral-500">
+            <span className="text-xs text-muted-foreground">
               Leave blank if not yet announced.
             </span>
           </label>
@@ -248,8 +250,9 @@ export default async function AdminPage({
             <textarea name="description" rows={3} className={inputClass} />
           </label>
           <button
+            type="submit"
             formAction={addCuratedVacancy}
-            className="self-start rounded bg-black px-3 py-1.5 text-sm text-white transition-transform active:scale-[0.97] dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300 sm:col-span-2"
+            className="self-start rounded-lg bg-primary px-3.5 py-1.5 text-sm font-bold text-primary-foreground shadow-[0_3px_0_var(--shadow-accent)] transition-transform active:translate-y-px sm:col-span-2"
           >
             Add curated vacancy
           </button>
