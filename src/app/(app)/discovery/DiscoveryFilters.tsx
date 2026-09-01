@@ -62,7 +62,7 @@ export function DiscoveryFilters({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border bg-card p-3">
+    <div className="flex flex-col gap-3 rounded-[20px_18px_21px_19px] border bg-card p-3.5 shadow-[0_16px_30px_-26px_rgba(96,74,52,0.5)]">
       <div className="flex flex-wrap gap-1.5">
         {SECTOR_OPTIONS.map((sector) => {
           const active = activeSectors.includes(sector);
