@@ -1,8 +1,8 @@
 ---
 project: Apprentio
 effort: E3
-phase: execute
-progress: 32/34
+phase: complete
+progress: 34/34
 mode: audit
 started: 2026-09-02T10:54:03Z
 updated: 2026-09-02T11:08:00Z
@@ -123,3 +123,17 @@ Confirm (with live tool evidence, not inspection alone) that a brand-new beta te
 - ISC-30/31: Closing summary itemizes every checked subsystem with live evidence and ends on an explicit go/no-go statement for today's beta.
 - ISC-32: No `src/` files were edited this run — only `.gitignore` and `ISA.md`, neither of which affects the app build; re-ran `bun run build` anyway after the .gitignore edit as a sanity check (clean).
 - Two real test accounts created during ISC-26 verification (`+launchaudit0902c@yahoo.com`, `+launchaudit0902d@gmail.com`) were deleted via the Supabase Admin API afterward — confirmed `200` on both `DELETE` calls, and a follow-up listing query no longer shows either.
+- **Post-advisor-call additions** (Rule 2 commitment-boundary advisor surfaced real gaps not in the original 34 ISCs):
+  - RLS/authz: `bunx supabase db advisors --linked` (Supabase's own security linter) returned zero ERROR-level findings. Every user-data table (`profiles`, `subscriptions`, `applications`, `application_events`, `interview_practice_attempts`) has active `select_own`/`insert_own`/`update_own`/`delete_own` RLS policies — the linter's only complaint about them is a performance suggestion (wrap `auth.uid()` in `select` for query-plan caching), not a security gap. The advisor's specific worst-case fear (RLS off + permissive `true` policy) would surface as an ERROR-level `rls_disabled_in_public` finding, which is absent.
+  - Anon-executable SECURITY DEFINER functions: inspected the two most sensitive by name directly (`handle_new_user`, `rls_auto_enable`) via `pg_proc.prosrc`. `handle_new_user` only references trigger-context `NEW`, which errors if called outside a trigger — not exploitable via RPC. `rls_auto_enable` turned out to be a Supabase **platform-provided** event-trigger function (owned by `postgres`, not present in any of our own migrations) that auto-enables RLS on any newly created public table — a safety net, not custom code with a gap.
+  - Confirmation-link click-through: completed end-to-end on a fresh real signup (`+launchaudit0902f@gmail.com`) — fetched the actual magic-link URL from the Resend API, navigated to it directly, landed authenticated on `/onboarding` (correct redirect for a not-yet-onboarded user). Confirms Supabase's Site URL/Redirect URL config has not drifted from `apprentio.app`.
+  - BETATESTER coupon behavior characterized via Stripe API: `duration: "repeating"`, `duration_in_months: 3`, `percent_off: 100`. Beta testers get 3 full months free — comfortably past the stated 4-week beta window — but will be charged automatically at month 4 unless they cancel first. Not a tonight-blocker; flagged to Archie as a decision needed before month 4 (cancel-and-recomp beta testers manually, or extend the coupon, before that boundary — especially relevant if Stripe has since flipped to live mode by then, since a stale saved card would then be charged for real).
+  - Coupon-exhaustion UX (friend #26) and Sentry/error-monitoring were not empirically tested (former is destructive — would burn real redemption slots; latter is genuinely absent) — surfaced as recommendations in the closing summary, not built this run, consistent with the Out of Scope framing (today's gate is the beta launch, not a general hardening pass).
+  - Privacy notice / minimum age / account-deletion path: NOT re-verified this run via new probes — already read directly (not from TODO.md claims) earlier in this session: `src/app/privacy/page.tsx` has a "Sixth-formers and age" section, `src/app/(app)/account/delete/page.tsx` implements a real typed-confirmation deletion flow, and TODO.md's "Test account deletion end-to-end" entry (from a prior session) verified live cascade deletion including Storage cleanup. Citing prior direct file reads as evidence, not the checkmark alone.
+
+## Changelog
+
+- conjectured: TODO.md's checked-off items are sufficient evidence of launch readiness on their own, given they document tool-verified claims from prior sessions.
+- refuted_by: the commitment-boundary advisor call, correctly pointing out that a checkmark is a *prior-session claim*, not current-session evidence — the exact failure mode a separate, prior ISA on this same account (Product Design NEA RedTeam, closed 2026-08-31) had already identified as its central finding (F2: plan documents accumulate claims that drift from reality; the fix is a mechanical probe that diffs claims against the artefact).
+- learned: spot-checking "the highest-risk claims" is not the same discipline as F2's mechanical-probe fix — it still trusts the checklist's own framing of what's risky. The stronger move, applied properly only after the advisor call, was probing categories the checklist doesn't cover at all (RLS/authz via Supabase's own linter, not just headers; the actual confirmation-link click-through, not just "email delivered"; coupon *behavior* over its lifetime, not just its current active/count state) — i.e. asking "what would a mechanical probe of the *real system* turn up that the document never claimed one way or the other," not just re-verifying the document's own claims.
+- criterion_now: for any future Apprentio audit, treat TODO.md checkmarks as a map of *what to probe*, not evidence in themselves — and explicitly probe at least one category the existing checklist is silent on (this run: RLS/authz, magic-link redirect correctness, coupon lifecycle) rather than only re-confirming categories it already claims are done.
