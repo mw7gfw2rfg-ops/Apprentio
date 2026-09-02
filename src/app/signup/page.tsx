@@ -57,7 +57,8 @@ export default async function SignupPage({
             type="email"
             required
             autoComplete="email"
-            className="h-11 rounded-2xl px-4 text-base"
+            placeholder="you@school.ac.uk"
+            className="h-11 rounded-2xl bg-background px-4 text-base"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -70,7 +71,8 @@ export default async function SignupPage({
             minLength={8}
             autoComplete="new-password"
             aria-describedby="password-hint"
-            className="h-11 rounded-2xl px-4 text-base"
+            placeholder="••••••••"
+            className="h-11 rounded-2xl bg-background px-4 text-base"
           />
           <span id="password-hint" className="text-xs text-muted-foreground/70">
             At least 8 characters.

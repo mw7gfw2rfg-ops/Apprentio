@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LegalTabs } from "@/components/legal-tabs";
 
 export const metadata = { title: "Privacy Policy — Apprentio" };
 
@@ -15,7 +16,10 @@ export default function PrivacyPolicyPage() {
         must not be relied on as a finished policy while real users&apos; data is involved.
       </div>
 
-      <h1 className="mt-8 font-heading text-3xl font-bold tracking-tight">Privacy Policy</h1>
+      <LegalTabs active="privacy" />
+
+      <div className="mt-5 rounded-[26px_22px_28px_24px] border border-border bg-card p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_30px_50px_-32px_rgba(96,74,52,0.55)] sm:p-10">
+      <h1 className="font-heading text-3xl font-bold tracking-tight">Privacy Policy</h1>
       <p className={p}>Last updated: 6 August 2026.</p>
 
       <h2 className={h2}>Who we are</h2>
@@ -146,6 +150,7 @@ export default function PrivacyPolicyPage() {
         We&apos;ll update the date at the top of this page when this policy changes. As
         noted above, this is currently a first draft.
       </p>
+      </div>
     </main>
   );
 }

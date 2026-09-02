@@ -61,11 +61,6 @@ export default async function DashboardPage({
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:py-10">
-      <div>
-        <h1 className="font-heading text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Signed in as {user.email}</p>
-      </div>
-
       {error && (
         <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">
           {error}
@@ -82,8 +77,8 @@ export default async function DashboardPage({
         </p>
       )}
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-[24px_20px_26px_22px] border border-border bg-card p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_24px_40px_-28px_rgba(96,74,52,0.55)]">
+      <div className="grid gap-4 md:grid-cols-3 [&>div]:min-w-0">
+        <div className="overflow-hidden rounded-[24px_20px_26px_22px] border border-border bg-card p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_24px_40px_-28px_rgba(96,74,52,0.55)]">
           <div className="font-extrabold">Applications</div>
           <p className="mt-0.5 mb-3.5 text-[13.5px] text-muted-foreground">
             Everything you&apos;ve saved and tracked.
@@ -116,24 +111,24 @@ export default async function DashboardPage({
           </div>
         </div>
 
-        <div className="rounded-[24px_20px_26px_22px] border border-[var(--warm-sky-border)] bg-[var(--warm-sky)] p-5">
+        <div className="min-w-0 overflow-hidden rounded-[24px_20px_26px_22px] border border-[var(--warm-sky-border)] bg-[var(--warm-sky)] p-5">
           <div className="flex items-start justify-between gap-2">
             <div className="font-extrabold text-[var(--warm-sky-foreground)]">
               Discover apprenticeships
             </div>
-            <Search className="size-[19px] text-[var(--warm-sky-foreground)]" />
+            <Search className="size-[19px] shrink-0 text-[var(--warm-sky-foreground)]" />
           </div>
           <p className="mt-2 mb-4.5 text-sm leading-relaxed text-[var(--warm-sky-foreground)]/90">
             Matched to your subjects, grades, and commute radius. New vacancies sync
             regularly from gov.uk and curated employers.
           </p>
-          <Button render={<Link href="/discovery" />}>
+          <Button className="w-full whitespace-normal" render={<Link href="/discovery" />}>
             Browse apprenticeships
-            <ArrowRight />
+            <ArrowRight className="shrink-0" />
           </Button>
         </div>
 
-        <div className="rounded-[24px_20px_26px_22px] border border-[var(--warm-peach-border)] bg-[var(--warm-peach)] p-5">
+        <div className="overflow-hidden rounded-[24px_20px_26px_22px] border border-[var(--warm-peach-border)] bg-[var(--warm-peach)] p-5">
           <div className="flex items-start justify-between gap-2">
             <div className="font-extrabold text-[var(--warm-peach-foreground)]">Account</div>
             <Badge className="border-[var(--warm-peach-border)] bg-card text-[var(--warm-peach-foreground)]">
@@ -147,14 +142,14 @@ export default async function DashboardPage({
                   Math.max(0, 2 - (profile?.free_drafts_used ?? 0)) === 1 ? "" : "s"
                 } remaining.`}
           </p>
-          <form action={isPremium ? createPortalSession : createCheckoutSession}>
+          <form action={isPremium ? createPortalSession : createCheckoutSession} className="w-full">
             <Button
               type="submit"
               variant="outline"
               size="sm"
-              className="border-[var(--warm-peach-foreground)] text-[var(--warm-peach-foreground)] hover:bg-[var(--warm-peach-foreground)] hover:text-[var(--warm-peach)]"
+              className="h-auto w-full min-w-0 whitespace-normal border-[var(--warm-peach-foreground)] py-2 text-center text-[var(--warm-peach-foreground)] hover:bg-[var(--warm-peach-foreground)] hover:text-[var(--warm-peach)]"
             >
-              <CreditCard />
+              <CreditCard className="shrink-0" />
               {isPremium ? "Manage subscription" : "Upgrade — £7.99/mo"}
             </Button>
           </form>

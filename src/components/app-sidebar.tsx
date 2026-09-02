@@ -11,6 +11,7 @@ import {
   LogOut,
   Palette,
   Search,
+  Settings as SettingsIcon,
   ShieldCheck,
   Trash2,
 } from "lucide-react";
@@ -47,6 +48,7 @@ const NAV_ITEMS = [
   { href: "/discovery", label: "Discover", icon: Search },
   { href: "/applications", label: "Applications", icon: FileText },
   { href: "/board", label: "Board", icon: Columns3 },
+  { href: "/account/settings", label: "Settings", icon: SettingsIcon },
 ];
 
 export function AppSidebar({

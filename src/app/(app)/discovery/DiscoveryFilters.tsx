@@ -27,12 +27,14 @@ export function DiscoveryFilters({
   activeCommute,
   activeClosingWithin,
   activeStartsBy,
+  resultCount,
 }: {
   activeSectors: string[];
   activeLevel: number | null;
   activeCommute: number | null;
   activeClosingWithin: string | null;
   activeStartsBy: string | null;
+  resultCount: number;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -169,6 +171,10 @@ export function DiscoveryFilters({
             Clear filters
           </Button>
         )}
+
+        <span className="ml-auto self-center text-[13.5px] font-bold text-muted-foreground/70">
+          {resultCount} match{resultCount === 1 ? "" : "es"}
+        </span>
       </div>
     </div>
   );

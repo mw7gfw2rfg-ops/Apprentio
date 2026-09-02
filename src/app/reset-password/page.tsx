@@ -43,7 +43,8 @@ export default async function ResetPasswordPage({
             minLength={8}
             autoComplete="new-password"
             aria-describedby="password-hint"
-            className="h-11 rounded-2xl px-4 text-base"
+            placeholder="••••••••"
+            className="h-11 rounded-2xl bg-background px-4 text-base"
           />
           <span id="password-hint" className="text-xs text-muted-foreground/70">
             At least 8 characters.

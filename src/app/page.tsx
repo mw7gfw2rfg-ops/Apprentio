@@ -217,7 +217,11 @@ export default async function Home() {
                     </li>
                   ))}
                 </ul>
-                <Button variant="outline" className="mt-6 w-full" render={<Link href="/signup" />}>
+                <Button
+                  variant="outline"
+                  className="mt-6 w-full border-2 border-foreground bg-transparent hover:bg-foreground hover:text-background"
+                  render={<Link href="/signup" />}
+                >
                   Sign up free
                 </Button>
               </div>
@@ -253,10 +257,35 @@ export default async function Home() {
               <h2 className="flex-1 font-heading text-3xl font-bold tracking-tight sm:text-4xl">
                 Ready to start?
               </h2>
-              <Button size="lg" render={<Link href="/signup" />}>
-                Sign up free
-                <ArrowRight />
-              </Button>
+              <div className="relative">
+                <svg
+                  viewBox="0 0 120 60"
+                  width="110"
+                  height="55"
+                  className="pointer-events-none absolute -left-[108px] -top-3.5 hidden overflow-visible sm:block"
+                  aria-hidden
+                >
+                  <path
+                    d="M4 8 C 44 2, 84 16, 104 40"
+                    fill="none"
+                    stroke="var(--warm-sage-border)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray="7 8"
+                  />
+                  <path
+                    d="M104 40 l -13 -3 M104 40 l 1 -13"
+                    fill="none"
+                    stroke="var(--warm-sage-border)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <Button size="lg" render={<Link href="/signup" />}>
+                  Sign up free
+                  <ArrowRight />
+                </Button>
+              </div>
             </div>
           </section>
         </main>

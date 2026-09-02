@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LegalTabs } from "@/components/legal-tabs";
 
 export const metadata = { title: "Terms of Service — Apprentio" };
 
@@ -15,7 +16,10 @@ export default function TermsOfServicePage() {
         involved.
       </div>
 
-      <h1 className="mt-8 font-heading text-3xl font-bold tracking-tight">Terms of Service</h1>
+      <LegalTabs active="terms" />
+
+      <div className="mt-5 rounded-[26px_22px_28px_24px] border border-border bg-card p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_30px_50px_-32px_rgba(96,74,52,0.55)] sm:p-10">
+      <h1 className="font-heading text-3xl font-bold tracking-tight">Terms of Service</h1>
       <p className={p}>Last updated: 6 August 2026.</p>
 
       <h2 className={h2}>What Apprentio is</h2>
@@ -109,6 +113,7 @@ export default function TermsOfServicePage() {
           richardson.archie@yahoo.com
         </a>
       </p>
+      </div>
     </main>
   );
 }

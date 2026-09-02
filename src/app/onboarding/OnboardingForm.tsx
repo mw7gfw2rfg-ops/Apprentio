@@ -94,6 +94,8 @@ export default function OnboardingForm({
         </p>
       )}
 
+      <div className="rounded-[24px_20px_26px_22px] border border-border bg-card p-6 shadow-[0_24px_42px_-30px_rgba(96,74,52,0.5)]">
+      <div className={legendClass}>About you</div>
       <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5 text-sm">
           <span className={fieldLabelClass}>Full name</span>
@@ -116,7 +118,9 @@ export default function OnboardingForm({
           />
         </label>
       </fieldset>
+      </div>
 
+      <div className="rounded-[24px_20px_26px_22px] border border-border bg-card p-6 shadow-[0_24px_42px_-30px_rgba(96,74,52,0.5)]">
       <fieldset className="flex flex-col gap-3">
         <legend className={legendClass}>Subjects & grades</legend>
         <AnimatePresence initial={false}>
@@ -191,7 +195,9 @@ export default function OnboardingForm({
           + Add subject
         </button>
       </fieldset>
+      </div>
 
+      <div className="rounded-[24px_20px_26px_22px] border border-border bg-card p-6 shadow-[0_24px_42px_-30px_rgba(96,74,52,0.5)]">
       <fieldset className="flex flex-col gap-2">
         <legend className={legendClass}>Sector interest</legend>
         <div className="flex flex-wrap gap-x-5 gap-y-2.5">
@@ -209,7 +215,10 @@ export default function OnboardingForm({
           ))}
         </div>
       </fieldset>
+      </div>
 
+      <div className="rounded-[24px_20px_26px_22px] border border-border bg-card p-6 shadow-[0_24px_42px_-30px_rgba(96,74,52,0.5)]">
+      <div className={legendClass}>Location &amp; eligibility</div>
       <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5 text-sm">
           <span className={fieldLabelClass}>Postcode</span>
@@ -324,6 +333,7 @@ export default function OnboardingForm({
           </label>
         </div>
       </fieldset>
+      </div>
 
       <button
         type="submit"

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/supabase/profile";
 import { isAdminEmail } from "@/lib/admin";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AppHeaderTitle } from "@/components/app-header-title";
 import { AccentStyle } from "@/components/accent-style";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -41,6 +42,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b bg-background/85 px-4 backdrop-blur-md">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="h-4" />
+          <AppHeaderTitle isPremium={isPremium} />
         </header>
         {children}
       </SidebarInset>

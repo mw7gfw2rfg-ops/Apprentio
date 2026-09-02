@@ -48,7 +48,8 @@ export default async function LoginPage({
             type="email"
             required
             autoComplete="email"
-            className="h-11 rounded-2xl px-4 text-base"
+            placeholder="you@school.ac.uk"
+            className="h-11 rounded-2xl bg-background px-4 text-base"
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -64,7 +65,8 @@ export default async function LoginPage({
             type="password"
             required
             autoComplete="current-password"
-            className="h-11 rounded-2xl px-4 text-base"
+            placeholder="••••••••"
+            className="h-11 rounded-2xl bg-background px-4 text-base"
           />
         </div>
         <Button type="submit" formAction={login} size="lg" className="mt-2">

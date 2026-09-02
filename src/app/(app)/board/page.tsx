@@ -39,13 +39,11 @@ export default async function BoardPage({
 
   return (
     <main className="flex min-h-screen flex-col gap-6 px-4 py-8 sm:py-10">
-      <div className="mx-auto w-full max-w-7xl">
-        <h1 className="font-heading text-3xl font-bold tracking-tight">Application board</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Every saved application, grouped by stage.
-        </p>
-        {error && <p className="mt-2 text-sm font-semibold text-destructive">{error}</p>}
-      </div>
+      {error && (
+        <div className="mx-auto w-full max-w-7xl">
+          <p className="text-sm font-semibold text-destructive">{error}</p>
+        </div>
+      )}
 
       <BoardColumns applications={applications ?? []} />
     </main>

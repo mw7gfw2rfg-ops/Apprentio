@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AccentColorPicker } from "@/components/accent-color-picker";
 import { DEFAULT_ACCENT_COLOR } from "@/lib/accent-color";
+import { Button } from "@/components/ui/button";
 import { updateAccentColor, resetAccentColor } from "./actions";
 
 export default async function AccountSettingsPage({
@@ -27,13 +29,6 @@ export default async function AccountSettingsPage({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-8 sm:py-10">
-      <div>
-        <h1 className="font-heading text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Personalise how Apprentio looks for you.
-        </p>
-      </div>
-
       {error && (
         <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">
           {error}
@@ -59,6 +54,23 @@ export default async function AccountSettingsPage({
           updateAccentColor={updateAccentColor}
           resetAccentColor={resetAccentColor}
         />
+      </div>
+
+      <div className="rounded-[24px_20px_26px_22px] border border-[var(--warm-peach-border)] bg-[var(--warm-peach)] p-6 shadow-[0_24px_42px_-30px_rgba(150,90,55,0.4)]">
+        <h2 className="font-heading text-lg font-bold text-[var(--warm-peach-foreground)]">
+          Delete account
+        </h2>
+        <p className="mt-2 mb-4 text-sm leading-relaxed text-[var(--warm-peach-foreground)]/90">
+          Permanently removes your profile, documents, and every application. This
+          can&apos;t be undone.
+        </p>
+        <Button
+          variant="outline"
+          className="border-[var(--warm-peach-foreground)] text-[var(--warm-peach-foreground)] hover:bg-[var(--warm-peach-foreground)] hover:text-[var(--warm-peach)]"
+          render={<Link href="/account/delete" />}
+        >
+          Delete my account
+        </Button>
       </div>
     </div>
   );

@@ -53,7 +53,8 @@ export default async function ForgotPasswordPage({
             type="email"
             required
             autoComplete="email"
-            className="h-11 rounded-2xl px-4 text-base"
+            placeholder="you@school.ac.uk"
+            className="h-11 rounded-2xl bg-background px-4 text-base"
           />
         </div>
         <Button type="submit" formAction={requestPasswordReset} size="lg" className="mt-2">
