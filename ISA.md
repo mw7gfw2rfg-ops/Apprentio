@@ -75,6 +75,19 @@ Confirm (with live tool evidence, not inspection alone) that a brand-new beta te
 - [DEFERRED-VERIFY] ISC-33: N/A — no fix was needed this run, so nothing to commit/push beyond ISA.md and .gitignore. Follow-up: none required unless a future audit finds a real bug.
 - [DEFERRED-VERIFY] ISC-34: N/A — no fix was needed this run, so no redeploy required. Follow-up: none required unless a future audit finds a real bug.
 
+## Features
+
+| name | description | satisfies | depends_on | parallelizable |
+|---|---|---|---|---|
+| Deploy/build health | Confirm git HEAD, lint, build, and production alias all agree | ISC-1..4 | — | yes |
+| Security surface | Headers, webhook signature check, TODO.md checklist cross-read | ISC-7..17, 25 | Deploy/build health | yes |
+| Beta-onboarding path | BETATESTER coupon existence, redemption headroom, lifecycle | ISC-18/19 | — | yes |
+| Email pipeline | Resend domain verification + real delivered send + real signup click-through | ISC-20/21, 26 | Deploy/build health | no (real signup depends on a live deploy) |
+| Data freshness | Vacancy-sync cron recency and row-count growth | ISC-22/23 | — | yes |
+| RLS/authz depth (added post-advisor) | Supabase security linter + manual inspection of anon-exposed functions | new, folded into ISC-26's Verification entry | Deploy/build health | yes |
+| Hygiene | Stray `${HOME}/` artifact removal + gitignore, test-account cleanup | ISC-27/28 | Email pipeline | yes |
+| Reporting | TODO.md/ISA documentation of findings and forward action items | ISC-29/30 | all of the above | no |
+
 ## Test Strategy
 
 | isc | type | check | threshold | tool |
