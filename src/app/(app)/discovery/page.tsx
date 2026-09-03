@@ -10,8 +10,10 @@ import { personalizeGradeSignal, type StudentGradeProfile } from "@/lib/vacancie
 import type { FaaVacancy } from "@/lib/vacancies/faa-client";
 import { getBaseCvText } from "@/lib/matching/cv-text-cache";
 import { extractVacancyKeywords, prepareCvForMatching, scoreMatch } from "@/lib/matching/match-score";
+import { getCuratedEmployersToWatch, type EmployerToWatch } from "@/lib/vacancies/employer-interest";
 import { DiscoveryFilters } from "./DiscoveryFilters";
 import { DiscoveryBoard, type VacancyMatch } from "./DiscoveryBoard";
+import { EmployersToWatch } from "./EmployersToWatch";
 import { getVacancyDetail, saveVacancy } from "./actions";
 
 type VacancyRow = {
@@ -194,6 +196,21 @@ export default async function DiscoveryPage({
     .eq("user_id", user.id);
   const savedIds = (savedRows ?? []).map((r) => r.vacancy_id);
 
+  // employer_sources is currently a hand-curated list of cyber-focused
+  // target employers (see TODO.md) -- gating on that sector rather than
+  // showing it to every student avoids surfacing GCHQ/BAE-type targets to
+  // someone who only ticked Hair & Beauty.
+  let employersToWatch: EmployerToWatch[] = [];
+  let registeredEmployerIds: string[] = [];
+  if (activeSectors.includes("Cybersecurity")) {
+    const [watchList, { data: interestRows }] = await Promise.all([
+      getCuratedEmployersToWatch(supabase),
+      supabase.from("employer_interest_registrations").select("employer_source_id").eq("user_id", user.id),
+    ]);
+    employersToWatch = watchList;
+    registeredEmployerIds = (interestRows ?? []).map((r) => r.employer_source_id);
+  }
+
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 sm:py-10">
       {params.error && <p className="text-sm text-destructive">{params.error}</p>}
@@ -257,6 +274,8 @@ export default async function DiscoveryPage({
         getVacancyDetail={getVacancyDetail}
         studentGrades={studentGrades}
       />
+
+      <EmployersToWatch employers={employersToWatch} registeredIds={registeredEmployerIds} />
     </main>
   );
 }

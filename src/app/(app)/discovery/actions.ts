@@ -104,3 +104,57 @@ export async function saveVacancy(formData: FormData) {
   revalidatePath("/discovery");
   revalidatePath(`/vacancies/${vacancyId}`);
 }
+
+export async function registerEmployerInterest(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const employerSourceId = formData.get("employer_source_id");
+  if (typeof employerSourceId !== "string" || !employerSourceId) {
+    redirect("/discovery?error=Missing employer");
+  }
+
+  const { error } = await supabase
+    .from("employer_interest_registrations")
+    .insert({ user_id: user.id, employer_source_id: employerSourceId });
+
+  if (error && error.code !== UNIQUE_VIOLATION) {
+    redirect(`/discovery?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/discovery");
+}
+
+export async function unregisterEmployerInterest(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const employerSourceId = formData.get("employer_source_id");
+  if (typeof employerSourceId !== "string" || !employerSourceId) {
+    redirect("/discovery?error=Missing employer");
+  }
+
+  const { error } = await supabase
+    .from("employer_interest_registrations")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("employer_source_id", employerSourceId);
+
+  if (error) {
+    redirect(`/discovery?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/discovery");
+}
