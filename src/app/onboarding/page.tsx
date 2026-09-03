@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { AnimatedPage } from "@/components/AnimatedPage";
 import OnboardingForm from "./OnboardingForm";
@@ -25,10 +27,12 @@ export default async function OnboardingPage({
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "full_name, school_year, subjects, grades, predicted_grades, sectors_of_interest, postcode, max_commute_minutes, right_to_work, security_clearance_eligible, minimum_apprenticeship_level, base_cv_storage_path, base_cover_letter_storage_path"
+      "onboarding_complete, full_name, school_year, subjects, grades, predicted_grades, sectors_of_interest, postcode, max_commute_minutes, right_to_work, security_clearance_eligible, minimum_apprenticeship_level, base_cv_storage_path, base_cover_letter_storage_path"
     )
     .eq("user_id", user.id)
     .single();
+
+  const isEditing = profile?.onboarding_complete === true;
 
   const [cvUrl, coverLetterUrl] = await Promise.all([
     profile?.base_cv_storage_path
@@ -58,7 +62,18 @@ export default async function OnboardingPage({
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center gap-10 px-4 py-16">
       <AnimatedPage className="flex flex-col gap-10">
         <div>
-          <h1 className="font-heading text-3xl font-bold tracking-tight">Tell us about you</h1>
+          {isEditing && (
+            <Link
+              href="/dashboard"
+              className="mb-3 inline-flex items-center gap-1 text-sm font-bold text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="size-4" />
+              Back to dashboard
+            </Link>
+          )}
+          <h1 className="font-heading text-3xl font-bold tracking-tight">
+            {isEditing ? "Edit your profile" : "Tell us about you"}
+          </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
             This drives which apprenticeships you&apos;re matched to.
           </p>
