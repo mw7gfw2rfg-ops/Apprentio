@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { saveOnboarding } from "./actions";
+import { CheckCircle2 } from "lucide-react";
+import { saveProfile } from "./actions";
 import {
   COMMUTE_OPTIONS,
   GRADE_OPTIONS,
@@ -23,6 +24,8 @@ type Props = {
   initialMinimumApprenticeshipLevel: number | null;
   error?: string;
   returnTo?: string;
+  cvUrl?: string | null;
+  coverLetterUrl?: string | null;
 };
 
 const inputClass =
@@ -44,6 +47,8 @@ export default function OnboardingForm({
   initialMinimumApprenticeshipLevel,
   error,
   returnTo,
+  cvUrl,
+  coverLetterUrl,
 }: Props) {
   const [subjects, setSubjects] = useState<SubjectRow[]>(
     initialSubjects.length > 0
@@ -85,7 +90,7 @@ export default function OnboardingForm({
   );
 
   return (
-    <form className="flex flex-col gap-8">
+    <form className="flex flex-col gap-8" encType="multipart/form-data">
       <input type="hidden" name="return_to" value={returnTo ?? "/onboarding"} />
       <input type="hidden" name="subjects_json" value={subjectsJson} />
       <input type="hidden" name="grades_json" value={gradesJson} />
@@ -338,13 +343,57 @@ export default function OnboardingForm({
       </fieldset>
       </div>
 
+      <div className="rounded-[24px_20px_26px_22px] border border-border bg-card p-6 shadow-[0_24px_42px_-30px_rgba(96,74,52,0.5)]">
+        <div className={legendClass}>Base documents</div>
+        <p className="-mt-1 mb-4 text-sm text-muted-foreground">
+          Your unmodified CV and cover letter — PDF or plain text, up to 5MB. Drafts
+          are tailored from these.
+        </p>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5 text-sm">
+            <span className={fieldLabelClass}>CV</span>
+            {cvUrl && <UploadedBadge href={cvUrl} />}
+            <input
+              type="file"
+              name="cv_file"
+              accept=".pdf,.txt,application/pdf,text/plain"
+              className="text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border file:border-border file:bg-background file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-foreground"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5 text-sm">
+            <span className={fieldLabelClass}>Cover letter</span>
+            {coverLetterUrl && <UploadedBadge href={coverLetterUrl} />}
+            <input
+              type="file"
+              name="cover_letter_file"
+              accept=".pdf,.txt,application/pdf,text/plain"
+              className="text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border file:border-border file:bg-background file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-foreground"
+            />
+          </div>
+        </div>
+      </div>
+
       <button
         type="submit"
-        formAction={saveOnboarding}
+        formAction={saveProfile}
         className="self-start rounded-2xl bg-primary px-5 py-3 text-base font-bold text-primary-foreground shadow-[0_4px_0_var(--shadow-accent)] transition-transform hover:-translate-y-0.5 active:translate-y-0.5"
       >
         Save & continue
       </button>
     </form>
+  );
+}
+
+function UploadedBadge({ href }: { href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[var(--warm-sage-border)] bg-[var(--warm-sage)] px-2.5 py-1 text-xs font-bold text-[var(--warm-sage-foreground)] hover:underline"
+    >
+      <CheckCircle2 className="size-3.5" />
+      Uploaded — view file
+    </a>
   );
 }

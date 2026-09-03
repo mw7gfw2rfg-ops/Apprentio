@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { GRADE_OPTIONS, SECTOR_OPTIONS } from "./constants";
+import { applyDocumentUploads } from "./documents-actions";
 
 function parseJsonArray(raw: FormDataEntryValue | null): string[] {
   if (typeof raw !== "string") return [];
@@ -35,16 +36,13 @@ function parseGradeMap(
   return Object.fromEntries(entries);
 }
 
-export async function saveOnboarding(formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
+// Core validation + write, no redirect -- shared by the merged saveProfile
+// action below. Returns error strings; empty means the update succeeded.
+async function applyProfileUpdate(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  formData: FormData
+): Promise<string[]> {
   const subjects = parseJsonArray(formData.get("subjects_json")).filter(
     (s) => s.trim().length > 0
   );
@@ -86,12 +84,7 @@ export async function saveOnboarding(formData: FormData) {
   )
     errors.push("Pick a minimum apprenticeship level");
 
-  const returnTo = (formData.get("return_to") as string | null) || "/onboarding";
-  const isInitialSetup = returnTo === "/onboarding";
-
-  if (errors.length > 0) {
-    redirect(`${returnTo}?error=${encodeURIComponent(errors.join("; "))}`);
-  }
+  if (errors.length > 0) return errors;
 
   const securityClearanceEligible =
     securityClearanceRaw === "yes"
@@ -116,10 +109,37 @@ export async function saveOnboarding(formData: FormData) {
       minimum_apprenticeship_level: minimumApprenticeshipLevel,
       onboarding_complete: true,
     })
-    .eq("user_id", user.id);
+    .eq("user_id", userId);
 
-  if (error) {
-    redirect(`${returnTo}?error=${encodeURIComponent(error.message)}`);
+  return error ? [error.message] : [];
+}
+
+// The single save action for both the first-time onboarding form and the
+// /profile edit page. Runs the profile update and (if any files were
+// selected) the document upload in the same submit, so there's no way to
+// save one half and silently lose the other -- previously these were two
+// separate forms/buttons on the same page, and clicking the profile-fields
+// button discarded any selected CV/cover letter without ever uploading it.
+export async function saveProfile(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const returnTo = (formData.get("return_to") as string | null) || "/onboarding";
+  const isInitialSetup = returnTo === "/onboarding";
+
+  const errors = [
+    ...(await applyProfileUpdate(supabase, user.id, formData)),
+    ...(await applyDocumentUploads(supabase, user.id, formData)),
+  ];
+
+  if (errors.length > 0) {
+    redirect(`${returnTo}?error=${encodeURIComponent(errors.join("; "))}`);
   }
 
   redirect(isInitialSetup ? "/dashboard" : `${returnTo}?success=1`);

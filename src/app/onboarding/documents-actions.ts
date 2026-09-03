@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 const BUCKET = "base-documents";
@@ -86,25 +85,22 @@ async function uploadDocument(
   return { path };
 }
 
-export async function uploadBaseDocuments(formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
+// Shared by the merged saveProfile action -- applies whichever of cv_file /
+// cover_letter_file are actually present in formData, no redirect. Returns
+// error strings (empty means either success or no files were provided).
+export async function applyDocumentUploads(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  formData: FormData
+): Promise<string[]> {
   const cvFile = formData.get("cv_file");
   const coverLetterFile = formData.get("cover_letter_file");
-  const returnTo = (formData.get("return_to") as string | null) || "/onboarding";
 
   const errors: string[] = [];
   const updates: Record<string, string | null> = {};
 
   if (cvFile instanceof File && cvFile.size > 0) {
-    const result = await uploadDocument(supabase, user.id, cvFile, "cv");
+    const result = await uploadDocument(supabase, userId, cvFile, "cv");
     if ("error" in result) errors.push(result.error);
     else {
       updates.base_cv_storage_path = result.path;
@@ -117,26 +113,15 @@ export async function uploadBaseDocuments(formData: FormData) {
   }
 
   if (coverLetterFile instanceof File && coverLetterFile.size > 0) {
-    const result = await uploadDocument(supabase, user.id, coverLetterFile, "cover-letter");
+    const result = await uploadDocument(supabase, userId, coverLetterFile, "cover-letter");
     if ("error" in result) errors.push(result.error);
     else updates.base_cover_letter_storage_path = result.path;
   }
 
-  if (Object.keys(updates).length === 0 && errors.length === 0) {
-    redirect(`${returnTo}?error=Choose a file to upload`);
-  }
-
   if (Object.keys(updates).length > 0) {
-    const { error } = await supabase
-      .from("profiles")
-      .update(updates)
-      .eq("user_id", user.id);
+    const { error } = await supabase.from("profiles").update(updates).eq("user_id", userId);
     if (error) errors.push(error.message);
   }
 
-  if (errors.length > 0) {
-    redirect(`${returnTo}?error=${encodeURIComponent(errors.join("; "))}`);
-  }
-
-  redirect(`${returnTo}?uploaded=1`);
+  return errors;
 }
