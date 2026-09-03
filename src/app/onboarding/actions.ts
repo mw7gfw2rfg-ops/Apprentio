@@ -86,8 +86,11 @@ export async function saveOnboarding(formData: FormData) {
   )
     errors.push("Pick a minimum apprenticeship level");
 
+  const returnTo = (formData.get("return_to") as string | null) || "/onboarding";
+  const isInitialSetup = returnTo === "/onboarding";
+
   if (errors.length > 0) {
-    redirect(`/onboarding?error=${encodeURIComponent(errors.join("; "))}`);
+    redirect(`${returnTo}?error=${encodeURIComponent(errors.join("; "))}`);
   }
 
   const securityClearanceEligible =
@@ -116,8 +119,8 @@ export async function saveOnboarding(formData: FormData) {
     .eq("user_id", user.id);
 
   if (error) {
-    redirect(`/onboarding?error=${encodeURIComponent(error.message)}`);
+    redirect(`${returnTo}?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect("/dashboard");
+  redirect(isInitialSetup ? "/dashboard" : `${returnTo}?success=1`);
 }

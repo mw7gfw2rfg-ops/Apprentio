@@ -201,7 +201,7 @@ export default async function DiscoveryPage({
       {geocodeFailed && (
         <p className="text-sm text-destructive">
           We couldn&apos;t locate the postcode on your profile ({profile.postcode}).{" "}
-          <Link href="/onboarding" className="underline">
+          <Link href="/profile" className="underline">
             Update it
           </Link>
           .
@@ -217,7 +217,7 @@ export default async function DiscoveryPage({
 
       {!preparedCv && (
         <p className="text-sm text-muted-foreground">
-          <Link href="/onboarding" className="underline">
+          <Link href="/profile" className="underline">
             Upload your CV
           </Link>{" "}
           to see match strength for each vacancy below.
@@ -236,7 +236,7 @@ export default async function DiscoveryPage({
       {routes.length === 0 && (
         <p className="text-sm text-muted-foreground">
           No sectors selected currently map to a matchable category.{" "}
-          <Link href="/onboarding" className="underline">
+          <Link href="/profile" className="underline">
             Adjust your sectors of interest
           </Link>
           , or pick some above.

@@ -49,7 +49,7 @@ const NAV_ITEMS = [
   { href: "/discovery", label: "Discover", icon: Search },
   { href: "/applications", label: "Applications", icon: FileText },
   { href: "/board", label: "Board", icon: Columns3 },
-  { href: "/onboarding", label: "Edit profile", icon: UserPen },
+  { href: "/profile", label: "Edit profile", icon: UserPen },
   { href: "/account/settings", label: "Settings", icon: SettingsIcon },
 ];
 

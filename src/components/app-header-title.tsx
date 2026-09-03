@@ -8,6 +8,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/discovery": "Discover apprenticeships",
   "/board": "Application board",
   "/applications": "My applications",
+  "/profile": "Edit profile",
   "/account/settings": "Settings",
   "/account/delete": "Delete account",
   "/admin": "Admin",

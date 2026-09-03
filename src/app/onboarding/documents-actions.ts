@@ -98,6 +98,7 @@ export async function uploadBaseDocuments(formData: FormData) {
 
   const cvFile = formData.get("cv_file");
   const coverLetterFile = formData.get("cover_letter_file");
+  const returnTo = (formData.get("return_to") as string | null) || "/onboarding";
 
   const errors: string[] = [];
   const updates: Record<string, string | null> = {};
@@ -122,7 +123,7 @@ export async function uploadBaseDocuments(formData: FormData) {
   }
 
   if (Object.keys(updates).length === 0 && errors.length === 0) {
-    redirect("/onboarding?error=Choose a file to upload");
+    redirect(`${returnTo}?error=Choose a file to upload`);
   }
 
   if (Object.keys(updates).length > 0) {
@@ -134,8 +135,8 @@ export async function uploadBaseDocuments(formData: FormData) {
   }
 
   if (errors.length > 0) {
-    redirect(`/onboarding?error=${encodeURIComponent(errors.join("; "))}`);
+    redirect(`${returnTo}?error=${encodeURIComponent(errors.join("; "))}`);
   }
 
-  redirect("/onboarding?uploaded=1");
+  redirect(`${returnTo}?uploaded=1`);
 }

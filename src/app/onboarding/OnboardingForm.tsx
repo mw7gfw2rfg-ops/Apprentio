@@ -22,6 +22,7 @@ type Props = {
   initialSecurityClearanceEligible: boolean | null;
   initialMinimumApprenticeshipLevel: number | null;
   error?: string;
+  returnTo?: string;
 };
 
 const inputClass =
@@ -42,6 +43,7 @@ export default function OnboardingForm({
   initialSecurityClearanceEligible,
   initialMinimumApprenticeshipLevel,
   error,
+  returnTo,
 }: Props) {
   const [subjects, setSubjects] = useState<SubjectRow[]>(
     initialSubjects.length > 0
@@ -84,6 +86,7 @@ export default function OnboardingForm({
 
   return (
     <form className="flex flex-col gap-8">
+      <input type="hidden" name="return_to" value={returnTo ?? "/onboarding"} />
       <input type="hidden" name="subjects_json" value={subjectsJson} />
       <input type="hidden" name="grades_json" value={gradesJson} />
       <input type="hidden" name="predicted_grades_json" value={predictedGradesJson} />

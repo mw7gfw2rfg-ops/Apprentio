@@ -132,7 +132,7 @@ export function VacancyDetailContent({
       {!hasCv && (
         <div className="rounded-2xl border border-dashed p-4">
           <p className="text-sm text-muted-foreground">
-            <Link href="/onboarding" className="underline">
+            <Link href="/profile" className="underline">
               Upload your base CV
             </Link>{" "}
             to see how well you match this vacancy.
